@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <link rel="stylesheet" href="https://MODHAUS_USER.github.io/modhaus-core/modhaus-ui.css">
+</head>
+<body>
+  <div class="mod-container">
+    
+    <div class="mod-header">
+      <h1 class="mod-title">UI Pattern Library</h1>
+      <p class="mod-subtitle">Live View of modhaus-ui.css</p>
+    </div>
+
+    <div class="mod-card">
+      <h2 style="border-bottom: 2px solid var(--mod-bg); padding-bottom: 10px;">1. Cards & Text</h2>
+      <p>This box is a <strong>.mod-card</strong>. All primary headings use <strong>.mod-title</strong> and subtext uses <strong>.mod-subtitle</strong>.</p>
+    </div>
+
+    <div class="mod-card">
+      <h2 style="border-bottom: 2px solid var(--mod-bg); padding-bottom: 10px;">2. Buttons</h2>
+      <div style="display: flex; gap: 15px; margin-top: 15px;">
+        <div style="flex: 1;">
+          <label>Primary (.mod-btn)</label>
+          <button class="mod-btn">Save Changes</button>
+        </div>
+        <div style="flex: 1;">
+          <label>Secondary (.btn-secondary)</label>
+          <button class="mod-btn btn-secondary">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="mod-card">
+      <h2 style="border-bottom: 2px solid var(--mod-bg); padding-bottom: 10px;">3. Form Elements</h2>
+      <label>Text Input (.mod-input)</label>
+      <input type="text" class="mod-input" placeholder="Type something...">
+      
+      <label>Select Menu (.mod-select)</label>
+      <select class="mod-select">
+        <option>Standard Option</option>
+        <option>Another Choice</option>
+      </select>
+    </div>
+
+    <div class="mod-card">
+      <h2 style="border-bottom: 2px solid var(--mod-bg); padding-bottom: 10px;">4. Status Feedback</h2>
+      <div class="success-text">
+        <strong>Success!</strong> This is the standard .success-text style.
+      </div>
+    </div>
+
+    <div class="version-tag">Modhaus Design System | Linked to GitHub CDN</div>
+  </div>
+</body>
+</html>
