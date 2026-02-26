@@ -1,9 +1,7 @@
-/* * ==================================================================
- * FILE: modhaus-web-app-ui-v1.css
- * ==================================================================
- * Modhaus Master Stylesheet
- * ==================================================================
- */
+/* ==================================================================
+ * MODHAUS MASTER DESIGN SYSTEM V1.1 (Full Feature Set)
+ * Includes: Drawers, Modals, Responsive Grids, and Form Elements
+ * ================================================================== */
 
 :root {
   --mod-blue: #1D4ED8;
@@ -12,52 +10,71 @@
   --mod-text-sub: #4B5563;
   --mod-border: #D1D5DB;
   --mod-radius: 12px;
+  --drawer-width: 300px; /* Standard Modhaus Drawer Width */
 }
 
+/* --- BASE & LAYOUT --- */
 body {
   background-color: var(--mod-bg);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   color: var(--mod-text-main);
   margin: 0;
-  padding: 20px;
+  padding: 0; /* Changed to 0 for full-width drawer support */
+  overflow-x: hidden;
 }
 
 .mod-container {
   max-width: 1200px;
   margin: 0 auto;
+  padding: 20px;
 }
 
+/* --- DRAWER SYSTEM (RETAINED FROM PREVIOUS PROJECT) --- */
+.mod-drawer {
+  position: fixed;
+  top: 0;
+  right: calc(-1 * var(--drawer-width));
+  width: var(--drawer-width);
+  height: 100%;
+  background: white;
+  box-shadow: -2px 0 15px rgba(0,0,0,0.1);
+  transition: right 0.3s ease-in-out;
+  z-index: 1000;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.mod-drawer.active {
+  right: 0;
+}
+
+.mod-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: none;
+  z-index: 999;
+}
+
+.mod-overlay.active {
+  display: block;
+}
+
+/* --- UI COMPONENTS --- */
 .mod-card {
   background-color: white;
   border-radius: var(--mod-radius);
   padding: 24px;
   margin-bottom: 24px;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0,0,0,0.05);
 }
 
-.mod-header { text-align: center; margin-bottom: 32px; }
-.mod-logo { max-width: 180px; display: block; margin: 0 auto 20px auto; }
-.mod-title { font-size: 2rem; font-weight: 800; color: #111827; margin: 0; }
-.mod-subtitle { color: var(--mod-text-sub); margin-top: 8px; }
-
-label { display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 4px; }
-
-.mod-input, .mod-select {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid var(--mod-border);
-  border-radius: 8px;
-  font-size: 1rem;
-  margin-bottom: 16px;
-  box-sizing: border-box;
-  transition: all 0.2s;
-}
-
-.mod-input:focus {
-  outline: none;
-  border-color: var(--mod-blue);
-  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.2);
-}
+.mod-title { font-size: 1.75rem; font-weight: 800; color: #111827; margin: 0; }
+.mod-subtitle { color: var(--mod-text-sub); margin-top: 4px; font-size: 0.9rem; }
 
 .mod-btn {
   background-color: var(--mod-blue);
@@ -67,28 +84,28 @@ label { display: block; font-size: 0.875rem; font-weight: 500; color: #374151; m
   border: none;
   border-radius: 8px;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.mod-btn:hover { background-color: #1e40af; transform: translateY(-1px); }
+
+.mod-input, .mod-select {
   width: 100%;
-  transition: background-color 0.2s;
-}
-
-.mod-btn:hover { background-color: #1e40af; }
-
-.btn-secondary {
-  background-color: white;
-  color: var(--mod-text-main);
+  padding: 12px;
   border: 1px solid var(--mod-border);
-  margin-top: 12px;
+  border-radius: 8px;
+  font-size: 1rem;
+  margin-bottom: 16px;
+  transition: border-color 0.2s;
 }
 
-.btn-secondary:hover { background-color: #F3F4F6; }
+.mod-input:focus { outline: none; border-color: var(--mod-blue); }
 
-.success-text {
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: #059669;
-  margin-bottom: 24px;
-}
-
+/* --- UTILITIES --- */
+.success-text { color: #059669; font-weight: 800; }
 .hidden { display: none !important; }
 .text-center { text-align: center; }
-.version-tag { color: #9CA3AF; font-size: 0.75rem; text-align: center; margin-top: 20px; }
+.version-tag { color: #9CA3AF; font-size: 0.75rem; text-align: center; padding: 20px; }
