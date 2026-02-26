@@ -1,0 +1,21 @@
+{
+  "short_name": "Modhaus",
+  "name": "Modhaus Internal Daycard",
+  "icons": [
+    {
+      "src": "https://modhaus-repo.github.io/modhaus-core/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "https://modhaus-repo.github.io/modhaus-core/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "background_color": "#F3F4F6",
+  "display": "standalone",
+  "scope": "/",
+  "theme_color": "#1D4ED8"
+}
