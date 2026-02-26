@@ -1,56 +1,94 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <base target="_top">
-  <link rel="stylesheet" href="https://MODHAUS_USER.github.io/modhaus-core/modhaus-ui.css">
-</head>
-<body>
-  <div class="mod-container">
-    
-    <div class="mod-header">
-      <h1 class="mod-title">UI Pattern Library</h1>
-      <p class="mod-subtitle">Live View of modhaus-ui.css</p>
-    </div>
+/* * ==================================================================
+ * FILE: modhaus-web-app-ui-v1.css
+ * ==================================================================
+ * Modhaus Master Stylesheet
+ * ==================================================================
+ */
 
-    <div class="mod-card">
-      <h2 style="border-bottom: 2px solid var(--mod-bg); padding-bottom: 10px;">1. Cards & Text</h2>
-      <p>This box is a <strong>.mod-card</strong>. All primary headings use <strong>.mod-title</strong> and subtext uses <strong>.mod-subtitle</strong>.</p>
-    </div>
+:root {
+  --mod-blue: #1D4ED8;
+  --mod-bg: #F3F4F6;
+  --mod-text-main: #111827;
+  --mod-text-sub: #4B5563;
+  --mod-border: #D1D5DB;
+  --mod-radius: 12px;
+}
 
-    <div class="mod-card">
-      <h2 style="border-bottom: 2px solid var(--mod-bg); padding-bottom: 10px;">2. Buttons</h2>
-      <div style="display: flex; gap: 15px; margin-top: 15px;">
-        <div style="flex: 1;">
-          <label>Primary (.mod-btn)</label>
-          <button class="mod-btn">Save Changes</button>
-        </div>
-        <div style="flex: 1;">
-          <label>Secondary (.btn-secondary)</label>
-          <button class="mod-btn btn-secondary">Cancel</button>
-        </div>
-      </div>
-    </div>
+body {
+  background-color: var(--mod-bg);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: var(--mod-text-main);
+  margin: 0;
+  padding: 20px;
+}
 
-    <div class="mod-card">
-      <h2 style="border-bottom: 2px solid var(--mod-bg); padding-bottom: 10px;">3. Form Elements</h2>
-      <label>Text Input (.mod-input)</label>
-      <input type="text" class="mod-input" placeholder="Type something...">
-      
-      <label>Select Menu (.mod-select)</label>
-      <select class="mod-select">
-        <option>Standard Option</option>
-        <option>Another Choice</option>
-      </select>
-    </div>
+.mod-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
 
-    <div class="mod-card">
-      <h2 style="border-bottom: 2px solid var(--mod-bg); padding-bottom: 10px;">4. Status Feedback</h2>
-      <div class="success-text">
-        <strong>Success!</strong> This is the standard .success-text style.
-      </div>
-    </div>
+.mod-card {
+  background-color: white;
+  border-radius: var(--mod-radius);
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
 
-    <div class="version-tag">Modhaus Design System | Linked to GitHub CDN</div>
-  </div>
-</body>
-</html>
+.mod-header { text-align: center; margin-bottom: 32px; }
+.mod-logo { max-width: 180px; display: block; margin: 0 auto 20px auto; }
+.mod-title { font-size: 2rem; font-weight: 800; color: #111827; margin: 0; }
+.mod-subtitle { color: var(--mod-text-sub); margin-top: 8px; }
+
+label { display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 4px; }
+
+.mod-input, .mod-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--mod-border);
+  border-radius: 8px;
+  font-size: 1rem;
+  margin-bottom: 16px;
+  box-sizing: border-box;
+  transition: all 0.2s;
+}
+
+.mod-input:focus {
+  outline: none;
+  border-color: var(--mod-blue);
+  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.2);
+}
+
+.mod-btn {
+  background-color: var(--mod-blue);
+  color: white;
+  font-weight: 600;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.2s;
+}
+
+.mod-btn:hover { background-color: #1e40af; }
+
+.btn-secondary {
+  background-color: white;
+  color: var(--mod-text-main);
+  border: 1px solid var(--mod-border);
+  margin-top: 12px;
+}
+
+.btn-secondary:hover { background-color: #F3F4F6; }
+
+.success-text {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #059669;
+  margin-bottom: 24px;
+}
+
+.hidden { display: none !important; }
+.text-center { text-align: center; }
+.version-tag { color: #9CA3AF; font-size: 0.75rem; text-align: center; margin-top: 20px; }
