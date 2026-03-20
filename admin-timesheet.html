@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  
+  <link rel="stylesheet" href="https://modhaus-repo.github.io/modhaus-core/modhaus-web-app-ui-v2.css">
+</head>
+<body>
+
+  <div id="sideDrawer" class="mod-drawer hidden">
+    <div class="mod-drawer-header">
+      <h3>Modhaus Menu</h3>
+      <button onclick="toggleDrawer()" class="mod-btn-close">X</button>
+    </div>
+    <div class="mod-drawer-links">
+      <a href="worker-timesheet.html" class="mod-drawer-link">Worker Timesheet</a>
+      <a href="admin-timesheet.html" class="mod-drawer-link" style="font-weight: bold;">Admin Timesheet</a>
+    </div>
+  </div>
+
+  <div class="mod-container" id="mainApp">
+    <div class="mod-card">
+      
+      <div class="mod-header" style="text-align: center; position: relative;">
+        <button onclick="toggleDrawer()" class="mod-btn-secondary" style="position: absolute; left: 0; top: 0;">☰ Menu</button>
+        <img src="https://modhaus-repo.github.io/modhaus-core/modhaus-logo.png" alt="Modhaus Logo" class="mod-logo" style="max-width: 300px; margin: 0 auto 20px auto; display: block;">
+        <h1 class="mod-title">Admin Timesheet</h1>
+      </div>
+
+      <form id="setupForm">
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <div style="flex: 1 1 45%; min-width: 140px;">
+             <label>Admin Name</label>
+             <input type="text" id="workerName" class="mod-input" required placeholder="e.g. Archie">
+          </div>
+          <div style="flex: 1 1 45%; min-width: 140px;">
+             <label>Date</label>
+             <input type="date" id="workDate" class="mod-input" required onchange="handleDateChange()">
+          </div>
+        </div>
+      </form>
+
+      <hr style="margin: 25px 0;">
+
+      <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: #374151;">Time Blocks</h3>
+      <div id="summaryContainer">
+        </div>
+
+      <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+        <button type="button" class="mod-btn mod-btn-secondary" onclick="addManualBlock()">+ Add Block to End</button>
+      </div>
+
+      <button type="button" id="btnSubmit" class="mod-btn" style="margin-top: 35px;" onclick="submitTimesheet()">Submit Timesheet</button>
+      <div id="submitStatus" class="text-center" style="margin-top: 15px; font-weight: 500;"></div>
+
+    </div>
+  </div>
+
+  <div id="editPanelOverlay" class="panel-overlay" onclick="closeEditPanel(event)">
+    <div class="mod-edit-panel" id="editPanelContent" onclick="event.stopPropagation()">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="font-size: 1.4rem; font-weight: bold; margin: 0;">Edit Block</h2>
+        <button class="mod-btn-close" onclick="closeEditPanel(true)" style="font-size: 1.5rem; margin: 0;">&times;</button>
+      </div>
+
+      <input type="hidden" id="editIndex">
+
+      <div class="time-inputs">
+        <div class="time-group">
+          <div style="display:flex; justify-content:space-between; align-items:baseline;">
+            <label style="margin:0;">Start Time</label>
+            <a href="javascript:void(0)" onclick="setTimeToNow('start')" style="font-size:1.05rem; font-weight:600; color:#1D4ED8; text-decoration:none;">Start Now</a>
+          </div>
+          <input type="time" id="editStart" class="mod-input" step="900" style="margin-top:5px;">
+        </div>
+        <div class="time-group">
+          <div style="display:flex; justify-content:space-between; align-items:baseline;">
+            <label style="margin:0;">End Time</label>
+            <a href="javascript:void(0)" onclick="setTimeToNow('end')" style="font-size:1.05rem; font-weight:600; color:#1D4ED8; text-decoration:none;">End Now</a>
+          </div>
+          <input type="time" id="editEnd" class="mod-input" step="900" style="margin-top:5px;">
+        </div>
+      </div>
+      
+      <label>Project</label>
+      <select id="editProject" class="mod-input"></select>
+
+      <label>Category</label>
+      <select id="editCategory" class="mod-input">
+        <option value="Standard">Standard</option>
+        <option value="Transit">Transit</option>
+        <option value="Internal Admin">Internal Admin</option>
+      </select>
+
+      <label>Task Description (Optional)</label>
+      <textarea id="editTask" class="mod-input" rows="2"></textarea>
+
+      <div class="action-row">
+        <button class="mod-btn mod-btn-secondary btn-triad" style="border-color: #DC2626; color: #DC2626;" onclick="deleteBlockFromPanel()">Remove Block</button>
+        <button class="mod-btn btn-triad" onclick="saveAsTransit()">In Transit</button>
+        <button class="mod-btn btn-triad" style="background-color: #10B981; border-color: #059669; color: white;" onclick="saveEditPanel()">Save Block</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="successStage" class="mod-container text-center hidden">
+    <div class="mod-card">
+      <h2 class="success-text">Success!</h2>
+      <p>Your timesheet has been recorded.</p>
+      <button class="mod-btn" onclick="resetApp()">Start New Entry</button>
+    </div>
+  </div>
+
+  <script>
+    // ==================================================================
+    // API CONFIGURATION
+    // ==================================================================
+    // PASTE YOUR NEW GOOGLE APPS SCRIPT DEPLOYMENT URL HERE:
+    const API_URL = "https://script.google.com/macros/s/AKfycbxErmt0SpLI0L486HfkRr001VUNqNLA_df8G6dEBTeFhJ6bP3ukex8aBdTFlQakqWGH/exec"; 
+
+    /**
+     * The Master Fetch Wrapper
+     * Bypasses CORS by sending a text/plain stringified JSON payload.
+     */
+    async function sendToApi(action, data = {}) {
+      try {
+        const payload = JSON.stringify({ action: action, data: data });
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: payload
+        });
+        return await response.json();
+      } catch (error) {
+        console.error("API Network Error:", error);
+        return { success: false, error: "Network or Server Error." };
+      }
+    }
+
+    // --- STATE MANAGEMENT ---
+    let appState = { baseDateMs: 0, blocks: [], projects: [] };
+
+    document.addEventListener('DOMContentLoaded', async function() {
+      const savedName = localStorage.getItem('modhaus_admin_name');
+      if (savedName) document.getElementById('workerName').value = savedName;
+      
+      const today = new Date();
+      document.getElementById('workDate').value = today.toISOString().split('T')[0];
+      appState.baseDateMs = new Date(document.getElementById('workDate').value).setHours(0,0,0,0);
+
+      // ASYNC FETCH: Load active projects from API
+      const projRes = await sendToApi('getActiveProjects');
+      if (projRes.success && projRes.data) {
+        appState.projects = projRes.data;
+      }
+
+      const currentName = document.getElementById('workerName').value;
+      if (currentName) {
+        // ASYNC FETCH: Check Backend Temp Sync
+        const syncRes = await sendToApi('loadTempBlocks', { workerName: currentName });
+        if (syncRes.success && syncRes.data && syncRes.data.blocks) {
+          appState.blocks = syncRes.data.blocks;
+          document.getElementById('workDate').value = syncRes.data.date.split('T')[0];
+          appState.baseDateMs = new Date(document.getElementById('workDate').value).setHours(0,0,0,0);
+          renderSummary();
+        } else {
+          loadLocalOrDefault();
+        }
+      } else {
+        loadLocalOrDefault();
+      }
+    });
+
+    function loadLocalOrDefault() {
+      const savedBlocks = localStorage.getItem('modhaus_admin_blocks');
+      const savedDate = localStorage.getItem('modhaus_admin_date');
+      
+      if (savedBlocks && savedDate === document.getElementById('workDate').value) {
+        appState.blocks = JSON.parse(savedBlocks);
+      } else {
+        generateDefaultBlocks();
+      }
+      renderSummary();
+    }
+
+    function toggleDrawer() { document.getElementById('sideDrawer').classList.toggle('hidden'); }
+
+    // --- MEMORY, SYNC & TIME ENGINE ---
+    function saveStateToHistory() {
+      localStorage.setItem('modhaus_admin_blocks', JSON.stringify(appState.blocks));
+      localStorage.setItem('modhaus_admin_date', document.getElementById('workDate').value);
+
+      const payload = {
+        workerName: document.getElementById('workerName').value || "Unknown",
+        dateOfWork: document.getElementById('workDate').value,
+        blocks: appState.blocks
+      };
+      
+      // Fire and forget - silent background API save
+      sendToApi('saveTempBlocks', payload);
+    }
+
+    function handleDateChange() {
+      appState.baseDateMs = new Date(document.getElementById('workDate').value).setHours(0,0,0,0);
+      generateDefaultBlocks();
+      renderSummary();
+    }
+
+    function generateDefaultBlocks() {
+      appState.blocks = [];
+      for(let i = 0; i < 10; i++) {
+        const startHour = 7 + i;
+        appState.blocks.push({
+          id: Date.now() + i, title: "Manual Entry", task: "", address: "", category: "Standard",
+          startTime: appState.baseDateMs + (startHour * 3600000),
+          endTime: appState.baseDateMs + ((startHour + 1) * 3600000)
+        });
+      }
+      saveStateToHistory();
+    }
+
+    function addManualBlock() {
+      let newStart = appState.baseDateMs + (17 * 3600000); 
+      if (appState.blocks.length > 0) newStart = appState.blocks[appState.blocks.length - 1].endTime;
+      appState.blocks.push({
+        id: Date.now(), title: "Manual Entry", task: "", address: "", category: "Standard",
+        startTime: newStart, endTime: newStart + 3600000
+      });
+      saveStateToHistory();
+      renderSummary();
+    }
+
+    function runCascadeSqueeze(index, oldStartMs, oldEndMs) {
+      const block = appState.blocks[index];
+      if (block.endTime !== oldEndMs) {
+        let cascadeStart = block.endTime;
+        for (let j = index + 1; j < appState.blocks.length; j++) {
+          appState.blocks[j].startTime = cascadeStart;
+          const duration = appState.blocks[j].endTime - appState.blocks[j].startTime;
+          if (duration < 15 * 60000) {
+            appState.blocks.splice(j, 1);
+            j--; 
+          } else { break; }
+        }
+      }
+      if (block.startTime !== oldStartMs && index > 0) {
+        appState.blocks[index - 1].endTime = block.startTime;
+        const duration = appState.blocks[index - 1].endTime - appState.blocks[index - 1].startTime;
+        if (duration < 15 * 60000) {
+          appState.blocks.splice(index - 1, 1);
+        }
+      }
+    }
+
+    // --- PROPORTIONAL, TRANSIT & COLOR RENDERING ---
+    function renderSummary() {
+      const container = document.getElementById('summaryContainer');
+      const submitBtn = document.getElementById('btnSubmit');
+      container.innerHTML = '';
+
+      if (appState.blocks.length === 0) {
+        submitBtn.disabled = true;
+        container.innerHTML = '<p class="text-center" style="color:#6B7280;">No blocks. Add one to begin.</p>';
+        return;
+      }
+      submitBtn.disabled = false;
+
+      appState.blocks.forEach((block, index) => {
+        const isProjectInvalid = !block.address || block.address === "Other" || block.address === "";
+        const hours = ((block.endTime - block.startTime) / 3600000);
+        const heightPx = Math.max(70, 40 + (hours * 45)); 
+        const isTransit = block.category === "Transit";
+        
+        let bgColor = "#F9FAFB";
+        let borderColor = "#9CA3AF"; 
+        if (!isProjectInvalid) borderColor = "#1D4ED8"; 
+        if (isTransit) { bgColor = "#DBEAFE"; borderColor = "#2563EB"; }
+        
+        const projText = isProjectInvalid ? `<span style="color:#DC2626; font-weight:bold;">Project Required</span>` : block.address;
+        const taskText = block.task ? ` | <span style="font-style:italic;">${block.task}</span>` : '';
+        
+        const row = document.createElement('div');
+        row.className = 'summary-row';
+        row.style.background = bgColor;
+        row.style.borderLeftColor = borderColor;
+        row.style.minHeight = `${heightPx}px`; 
+        row.onclick = () => openEditPanel(index);
+        
+        row.innerHTML = `
+          <div style="flex: 1; padding-right: 15px;">
+            <div class="summary-time">${msToTime(block.startTime)} - ${msToTime(block.endTime)}</div>
+            <div class="summary-details">${projText}${taskText}</div>
+          </div>
+          <div style="font-weight: 700; color: ${borderColor}; background: white; border: 1px solid ${borderColor}; padding: 6px 12px; border-radius: 20px; font-size: 0.9rem; white-space: nowrap;">
+            ${hours.toFixed(2)} hr
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    // --- ROUNDING TIME ENGINE ---
+    function getRoundedNowMs() {
+      const now = new Date();
+      let mins = now.getMinutes();
+      const rem = mins % 15;
+      if (rem <= 5) { mins -= rem; } else { mins += (15 - rem); }
+      now.setMinutes(mins, 0, 0);
+      return now.getTime();
+    }
+
+    function setTimeToNow(field) {
+      const targetMs = getRoundedNowMs();
+      const timeStr = msToTime(targetMs);
+      if(field === 'start') document.getElementById('editStart').value = timeStr;
+      if(field === 'end') document.getElementById('editEnd').value = timeStr;
+    }
+
+    // --- PANEL ACTIONS ---
+    function openEditPanel(index) {
+      const block = appState.blocks[index];
+      document.getElementById('editIndex').value = index;
+      document.getElementById('editStart').value = msToTime(block.startTime);
+      document.getElementById('editEnd').value = msToTime(block.endTime);
+      
+      const projSelect = document.getElementById('editProject');
+      const isInvalid = !block.address || block.address === "Other" || block.address === "";
+      
+      let pOptions = `<option value="" disabled ${isInvalid ? 'selected' : ''}>-- Select Project --</option>`;
+      appState.projects.forEach(p => { pOptions += `<option value="${p}" ${block.address === p ? 'selected' : ''}>${p}</option>`; });
+      pOptions += `<option value="Modhaus Admin" ${block.address === 'Modhaus Admin' ? 'selected' : ''}>Modhaus Admin</option>`;
+      pOptions += `<option value="In Transit" ${block.address === 'In Transit' ? 'selected' : ''}>In Transit</option>`;
+      projSelect.innerHTML = pOptions;
+      
+      document.getElementById('editCategory').value = block.category || "Standard";
+      document.getElementById('editTask').value = block.task || "";
+      document.getElementById('editPanelOverlay').style.display = 'flex';
+    }
+
+    function closeEditPanel(fromClick = false) {
+      if(fromClick === true || fromClick.target === document.getElementById('editPanelOverlay')) {
+        document.getElementById('editPanelOverlay').style.display = 'none';
+      }
+    }
+
+    function saveEditPanel() {
+      const index = parseInt(document.getElementById('editIndex').value);
+      const block = appState.blocks[index];
+      const oldStart = block.startTime;
+      const oldEnd = block.endTime;
+
+      block.startTime = timeToMs(document.getElementById('editStart').value, appState.baseDateMs);
+      block.endTime = timeToMs(document.getElementById('editEnd').value, appState.baseDateMs);
+      block.address = document.getElementById('editProject').value;
+      block.category = document.getElementById('editCategory').value;
+      block.task = document.getElementById('editTask').value;
+
+      runCascadeSqueeze(index, oldStart, oldEnd);
+      saveStateToHistory();
+      closeEditPanel(true);
+      renderSummary();
+    }
+
+    function saveAsTransit() {
+      document.getElementById('editProject').value = "In Transit";
+      document.getElementById('editCategory').value = "Transit";
+      document.getElementById('editTask').value = ""; 
+      saveEditPanel();
+    }
+
+    function deleteBlockFromPanel() {
+      const index = parseInt(document.getElementById('editIndex').value);
+      appState.blocks.splice(index, 1);
+      saveStateToHistory();
+      closeEditPanel(true);
+      renderSummary();
+    }
+
+    function timeToMs(timeStr, baseMs) {
+      const [hours, minutes] = timeStr.split(':').map(Number);
+      const d = new Date(baseMs);
+      d.setHours(hours, minutes, 0, 0);
+      return d.getTime();
+    }
+    
+    function msToTime(ms) {
+      const d = new Date(ms);
+      return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    }
+
+    // --- FINAL SUBMISSION (ASYNC) ---
+    async function submitTimesheet() {
+      const invalidBlocks = appState.blocks.filter(b => !b.address || b.address === "Other" || b.address === "");
+      if (invalidBlocks.length > 0) {
+        document.getElementById('submitStatus').textContent = "Cannot submit: Please fix blocks with 'Project Required'.";
+        document.getElementById('submitStatus').style.color = "#DC2626";
+        return;
+      }
+      
+      const btn = document.getElementById('btnSubmit');
+      const status = document.getElementById('submitStatus');
+      btn.disabled = true; btn.textContent = "Submitting...";
+
+      appState.blocks.forEach(b => { b.hours = (b.endTime - b.startTime) / 3600000; });
+      const payload = {
+        workerName: document.getElementById('workerName').value.trim(),
+        workerRole: "ADM_Project Co-ordination", 
+        dateOfWork: document.getElementById('workDate').value,
+        blocks: appState.blocks
+      };
+      
+      localStorage.setItem('modhaus_admin_name', payload.workerName);
+
+      // ASYNC FETCH: Final Submit
+      const response = await sendToApi('submitAdminTimesheet', payload);
+
+      if (response.success) {
+        localStorage.removeItem('modhaus_admin_blocks');
+        document.getElementById('mainApp').classList.add('hidden');
+        document.getElementById('successStage').classList.remove('hidden');
+      } else {
+        status.textContent = 'Error: ' + (response.error || 'Server error'); 
+        status.style.color = '#DC2626';
+        btn.disabled = false; btn.textContent = "Submit Timesheet";
+      }
+    }
+
+    function resetApp() {
+      generateDefaultBlocks();
+      document.getElementById('successStage').classList.add('hidden');
+      document.getElementById('mainApp').classList.remove('hidden');
+      document.getElementById('submitStatus').textContent = "";
+      renderSummary();
+    }
+  </script>
+</body>
+</html>
