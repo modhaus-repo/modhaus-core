@@ -1,0 +1,225 @@
+/*
+ * ==================================================================
+ * FILE: modhaus-web-app-ui-v1.css ========= Updated 2026-03-20
+ * ==================================================================
+ * Purpose: Central Modhaus Design System for all Decoupled PWAs.
+ * Updates: Brought Title Block up to date. Merged Legacy Portal UI, 
+ * Timesheet UI, and Responsive Modals into the core CDN.
+ */
+
+:root {
+  --mod-blue: #1D4ED8;
+  --mod-bg: #F3F4F6;
+  --mod-text-main: #111827;
+  --mod-text-sub: #4B5563;
+  --mod-border: #D1D5DB;
+  --mod-radius: 12px;
+  --drawer-width: 300px;
+}
+
+/* --- BASE & LAYOUT --- */
+* { box-sizing: border-box; } 
+body {
+  background-color: var(--mod-bg);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: var(--mod-text-main);
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+.mod-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* --- DRAWER SYSTEM (CORE) --- */
+.mod-drawer {
+  position: fixed;
+  top: 0;
+  right: calc(-1 * var(--drawer-width));
+  width: var(--drawer-width);
+  height: 100%;
+  background: white;
+  box-shadow: -2px 0 15px rgba(0,0,0,0.1);
+  transition: right 0.3s ease-in-out;
+  z-index: 1000;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.mod-drawer.active {
+  right: 0;
+}
+
+.mod-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: none;
+  z-index: 999;
+}
+
+.mod-overlay.active {
+  display: block;
+}
+
+/* --- UI COMPONENTS (CORE) --- */
+.mod-card {
+  background-color: white;
+  border-radius: var(--mod-radius);
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+.mod-title { font-size: 1.75rem; font-weight: 800; color: #111827; margin: 0; }
+.mod-subtitle { color: var(--mod-text-sub); margin-top: 4px; font-size: 0.9rem; }
+
+.mod-btn {
+  background-color: var(--mod-blue);
+  color: white;
+  font-weight: 600;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.mod-btn:hover { background-color: #1e40af; transform: translateY(-1px); }
+.mod-btn-secondary { background: white; color: var(--mod-text-main); border: 1px solid var(--mod-border); }
+.mod-btn-close { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--mod-text-sub); }
+
+.mod-input, .mod-select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--mod-border);
+  border-radius: 8px;
+  font-size: 1rem;
+  margin-bottom: 16px;
+  transition: border-color 0.2s;
+}
+
+.mod-input:focus { outline: none; border-color: var(--mod-blue); }
+
+.success-text { color: #059669; font-weight: 800; }
+.hidden { display: none !important; }
+.text-center { text-align: center; }
+
+/* ==================================================================
+ * MODULE: ADMIN TIMESHEET (Summary & Edit Panel)
+ * ================================================================== */
+.summary-row {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding: 18px 20px; 
+  border: 1px solid #E5E7EB; border-radius: 8px;
+  margin-bottom: 12px; background: #F9FAFB; cursor: pointer;
+  border-left: 5px solid #9CA3AF; 
+  transition: background 0.2s, border-color 0.2s;
+}
+.summary-row:hover { filter: brightness(0.97); }
+.summary-time { font-weight: 700; font-size: 1.05rem; color: #111827; }
+.summary-details { font-size: 0.9rem; color: #4B5563; margin-top: 6px; line-height: 1.4; }
+
+.panel-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 1000; display: none; justify-content: center;
+  height: 100dvh; 
+}
+
+.mod-edit-panel {
+  background: white; padding: 25px 20px; box-shadow: 0 -4px 6px -1px rgba(0,0,0,0.1);
+  display: flex; flex-direction: column; overflow-y: auto; width: 100%;
+}
+
+.time-inputs { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
+.time-group { flex: 1 1 45%; min-width: 120px; }
+.action-row { display: flex; gap: 8px; margin-top: 25px; flex-wrap: nowrap; }
+.btn-triad { flex: 1; padding: 12px 4px; font-size: 0.85rem; text-align: center; white-space: nowrap; }
+
+/* ==================================================================
+ * MODULE: MODHAUS HUB & PORTAL SPECIFICATIONS
+ * ================================================================== */
+.spec-sticky-header {
+  position: sticky; top: 0; z-index: 100;
+  background: white; border-bottom: 1px solid #E5E7EB;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; flex-direction: column;
+  padding-bottom: 4px;
+}
+
+.spec-row-top { display: flex; align-items: center; gap: 12px; padding: 12px 14px 8px 14px; width: 100%; }
+.spec-title { margin: 0; font-size: 1.25rem; font-weight: 800; color: #111827; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.spec-back-btn { background: #F3F4F6; border: 1px solid #E5E7EB; border-radius: 8px; padding: 8px 14px; font-weight: 700; color: #1D4ED8; cursor: pointer; font-size: 0.85rem; flex-shrink: 0; }
+.spec-row-search { padding: 4px 14px; width: 100%; display: block; }
+.spec-search-input { width: 100%; padding: 12px 14px; border: 1px solid #D1D5DB; border-radius: 10px; font-size: 1rem; background: #F9FAFB; outline: none; }
+.spec-search-input:focus { border-color: #1D4ED8; background: white; }
+
+.spec-filter-container { display: flex; align-items: center; padding: 8px 14px 10px 14px; gap: 12px; width: 100%; overflow: hidden; }
+.spec-filter-fixed { flex-shrink: 0; }
+.spec-filter-scroll { display: flex; overflow-x: auto; gap: 8px; flex-grow: 1; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding-right: 10px; }
+.spec-filter-scroll::-webkit-scrollbar { display: none; }
+.spec-filter-pill { white-space: nowrap; background: #F3F4F6; border: 1px solid #E5E7EB; padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; color: #4B5563; cursor: pointer; transition: all 0.2s; }
+.spec-filter-pill.active { background: #1D4ED8; color: white; border-color: #1D4ED8; box-shadow: 0 2px 4px rgba(29, 78, 216, 0.2); }
+
+.spec-list-container { padding: 12px; background: #F3F4F6; min-height: 100vh; }
+.spec-card { background: white; border-radius: 10px; border: 1px solid #E5E7EB; margin-bottom: 10px; overflow: hidden; width: 100%; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+.spec-header { padding: 12px 14px; display: flex; gap: 12px; cursor: pointer; align-items: center; }
+.spec-emoji { font-size: 1.2rem; background: #F3F4F6; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 8px; flex-shrink: 0; }
+.spec-content-main { flex-grow: 1; overflow: hidden; }
+.spec-line-1 { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
+.spec-keyword { font-weight: 700; font-size: 1rem; color: #111827; }
+.spec-code { font-weight: 800; color: #1D4ED8; font-size: 0.75rem; background: #EFF6FF; padding: 2px 6px; border-radius: 4px; margin-left: 5px; }
+.spec-line-2 { font-size: 0.85rem; color: #6B7280; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.spec-drawer { display: none; padding: 16px; background: #F8FAFC; border-top: 1px solid #E5E7EB; }
+.url-btn { display: block; width: 100%; text-align: center; background: #1D4ED8; color: white; text-decoration: none; padding: 14px; border-radius: 10px; font-weight: 600; margin-top: 10px; }
+
+.folder-card { cursor: pointer; transition: all 0.2s; background: white; border-radius: 12px; border: 1px solid #E5E7EB; margin-bottom: 12px; }
+.folder-header { display: flex; align-items: center; justify-content: space-between; font-weight: 500; padding: 16px; }
+.folder-content { display: none; padding: 15px; border-top: 1px solid #eee; }
+.folder-card.active { border-color: #1D4ED8; box-shadow: 0 4px 12px rgba(29, 78, 216, 0.15); }
+.folder-card.active .folder-content { display: block; }
+.file-item { display: flex; align-items: center; padding: 12px; margin-bottom: 8px; background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; text-decoration: none; color: #374151; font-size: 0.9rem; }
+
+/* --- SPLASH SCREEN & UTILITIES --- */
+#splashScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s; }
+.logo-container { width: 100px; height: 100px; margin-bottom: 25px; animation: pulseLogo 2s infinite; }
+.logo-img { width: 100%; height: 100%; object-fit: contain; }
+@keyframes pulseLogo { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+#enterBtn { display: none; background: #F4B183; color: white; font-weight: 700; padding: 14px 28px; border-radius: 50px; border: none; margin-top: 10px; }
+#loadingText { color: #9CA3AF; font-size: 11px; letter-spacing: 2px; margin-top: 10px; font-weight: 500; }
+.spinner { display: inline-block; animation: spin 1s linear infinite; } 
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+/* ==================================================================
+ * RESPONSIVE POLYMORPHISM (Desktop vs Mobile handling)
+ * ================================================================== */
+@media (max-width: 768px) {
+  .panel-overlay { align-items: flex-end; }
+  .mod-edit-panel { 
+    max-height: 85dvh; 
+    border-radius: 20px 20px 0 0; 
+    padding-bottom: max(30px, env(safe-area-inset-bottom)); 
+    animation: slideUp 0.3s ease-out; 
+  }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+}
+@media (min-width: 769px) {
+  .panel-overlay { align-items: center; }
+  .mod-edit-panel { 
+    width: 550px; 
+    max-height: 85vh; 
+    border-radius: 12px; 
+    animation: fadeIn 0.2s ease-out; 
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+}
