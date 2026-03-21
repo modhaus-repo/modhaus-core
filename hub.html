@@ -65,15 +65,14 @@
 
   <div id="hubView" class="mod-container hidden">
     <div class="mod-card">
-      <div class="mod-header" style="display: flex; justify-content: space-between; align-items: flex-start; text-align: left; margin-bottom: 20px;">
-        <div>
-          <h1 class="mod-title">Modhaus Hub</h1>
-          <div class="role-badge" id="displayRole">Loading...</div>
-        </div>
-        <button onclick="logoutProfile()" class="mod-btn-secondary" style="font-size: 0.8rem; padding: 6px 12px; border-radius: 6px;">Reset</button>
+      
+      <div class="mod-header" style="text-align: center; margin-bottom: 20px;">
+        <img src="https://modhaus-repo.github.io/modhaus-core/modhaus-logo.png" alt="Modhaus Logo" style="max-width: 200px; margin: 0 auto 15px auto; display: block;">
+        <h1 class="mod-title">Modhaus Hub</h1>
+        <div class="role-badge" id="displayRole">Loading...</div>
       </div>
       
-      <p style="color: #4B5563; font-weight: 500;">Welcome back, <span id="displayName" style="color: #111827; font-weight: 800;"></span>.</p>
+      <p style="color: #4B5563; font-weight: 500; text-align: center; margin-bottom: 25px;">Welcome back, <span id="displayName" style="color: #111827; font-weight: 800;"></span>.</p>
       
       <div class="hub-grid">
         <a href="admin-timesheet.html" class="hub-btn mod-req-admin">
@@ -84,35 +83,42 @@
           <span><span class="hub-icon">👷</span> Worker Timesheet</span>
           <span style="color: #9CA3AF;">➜</span>
         </a>
-        <a href="#" class="hub-btn">
+
+        <a href="#" class="hub-btn hidden">
+          <span><span class="hub-icon">📤</span> Upload Documentation</span>
+          <span style="color: #9CA3AF;">➜</span>
+        </a>
+        <a href="#" class="hub-btn hidden">
           <span><span class="hub-icon">📐</span> Construction Drawings</span>
           <span style="color: #9CA3AF;">➜</span>
         </a>
-        <a href="#" class="hub-btn">
+        <a href="#" class="hub-btn hidden">
           <span><span class="hub-icon">📑</span> Specifications</span>
           <span style="color: #9CA3AF;">➜</span>
         </a>
-        <a href="#" class="hub-btn">
-          <span><span class="hub-icon">🗂️</span> Add. Documentation</span>
+        <a href="#" class="hub-btn hidden">
+          <span><span class="hub-icon">🗂️</span> Additional Documentation</span>
           <span style="color: #9CA3AF;">➜</span>
         </a>
-        <a href="#" class="hub-btn">
+        <a href="#" class="hub-btn hidden">
           <span><span class="hub-icon">🚿</span> Fixture Specs</span>
           <span style="color: #9CA3AF;">➜</span>
         </a>
-        <a href="#" class="hub-btn">
+        <a href="#" class="hub-btn hidden">
           <span><span class="hub-icon">⚠️</span> Safety Data Sheets</span>
           <span style="color: #9CA3AF;">➜</span>
         </a>
-        <a href="#" class="hub-btn">
+        <a href="#" class="hub-btn hidden">
           <span><span class="hub-icon">📋</span> Site Induction Form</span>
           <span style="color: #9CA3AF;">➜</span>
         </a>
-        <a href="#" class="hub-btn">
+        <a href="#" class="hub-btn hidden">
           <span><span class="hub-icon">🤝</span> Code Of Conduct</span>
           <span style="color: #9CA3AF;">➜</span>
         </a>
       </div>
+      
+      <button onclick="logoutProfile()" class="mod-btn-secondary" style="width: 100%; margin-top: 30px; border-color: #DC2626; color: #DC2626;">Reset Profile</button>
       
     </div>
   </div>
@@ -160,7 +166,7 @@
         pinContainer.classList.remove('hidden');
       } else {
         pinContainer.classList.add('hidden');
-        document.getElementById('setupPin').value = ''; // clear it out
+        document.getElementById('setupPin').value = ''; 
       }
     }
 
@@ -173,14 +179,13 @@
         return;
       }
       
-      // The Bouncer: PIN Validation
       if (roleVal === 'Admin') {
         const pinVal = document.getElementById('setupPin').value;
         if (pinVal !== '6308') {
           alert("Incorrect Admin PIN. Access Denied.");
-          return; // Stops the login process entirely
+          return; 
         }
-        localStorage.setItem('modhaus_admin_name', nameVal); // Sync for timesheet
+        localStorage.setItem('modhaus_admin_name', nameVal); 
       }
       
       localStorage.setItem('modhaus_user_name', nameVal);
@@ -189,15 +194,14 @@
     }
 
     function logoutProfile() {
-      if(confirm("Are you sure you want to clear your profile?")) {
+      if(confirm("Are you sure you want to reset your profile? You will need to re-enter your details to access the Hub.")) {
         localStorage.removeItem('modhaus_user_name');
         localStorage.removeItem('modhaus_user_role');
         
-        // Reset inputs so the login screen is blank
         document.getElementById('setupName').value = '';
         document.getElementById('setupRole').value = '';
         document.getElementById('setupPin').value = '';
-        handleRoleChange(); // Ensure PIN box hides
+        handleRoleChange(); 
         
         initHub();
       }
