@@ -46,12 +46,17 @@
         <input type="text" id="setupName" class="mod-input" placeholder="e.g. Archie">
         
         <label>System Role</label>
-        <select id="setupRole" class="mod-input">
+        <select id="setupRole" class="mod-input" onchange="handleRoleChange()">
           <option value="" disabled selected>-- Select Role --</option>
           <option value="Admin">Admin / Management</option>
           <option value="Worker">Worker</option>
           <option value="Sub-Contractor">Sub-Contractor</option>
         </select>
+        
+        <div id="pinContainer" class="hidden">
+          <label style="color: #DC2626; font-weight: bold;">Admin PIN Required</label>
+          <input type="password" id="setupPin" class="mod-input" placeholder="Enter 4-digit PIN" inputmode="numeric" style="border-color: #DC2626; background-color: #FEF2F2;">
+        </div>
         
         <button class="mod-btn" style="margin-top: 15px; width: 100%;" onclick="registerProfile()">Configure Hub</button>
       </div>
@@ -147,6 +152,18 @@
       }
     }
 
+    function handleRoleChange() {
+      const roleVal = document.getElementById('setupRole').value;
+      const pinContainer = document.getElementById('pinContainer');
+      
+      if (roleVal === 'Admin') {
+        pinContainer.classList.remove('hidden');
+      } else {
+        pinContainer.classList.add('hidden');
+        document.getElementById('setupPin').value = ''; // clear it out
+      }
+    }
+
     function registerProfile() {
       const nameVal = document.getElementById('setupName').value.trim();
       const roleVal = document.getElementById('setupRole').value;
@@ -156,12 +173,18 @@
         return;
       }
       
+      // The Bouncer: PIN Validation
+      if (roleVal === 'Admin') {
+        const pinVal = document.getElementById('setupPin').value;
+        if (pinVal !== '6308') {
+          alert("Incorrect Admin PIN. Access Denied.");
+          return; // Stops the login process entirely
+        }
+        localStorage.setItem('modhaus_admin_name', nameVal); // Sync for timesheet
+      }
+      
       localStorage.setItem('modhaus_user_name', nameVal);
       localStorage.setItem('modhaus_user_role', roleVal);
-      
-      if (roleVal === 'Admin') {
-        localStorage.setItem('modhaus_admin_name', nameVal);
-      }
       initHub();
     }
 
@@ -169,6 +192,13 @@
       if(confirm("Are you sure you want to clear your profile?")) {
         localStorage.removeItem('modhaus_user_name');
         localStorage.removeItem('modhaus_user_role');
+        
+        // Reset inputs so the login screen is blank
+        document.getElementById('setupName').value = '';
+        document.getElementById('setupRole').value = '';
+        document.getElementById('setupPin').value = '';
+        handleRoleChange(); // Ensure PIN box hides
+        
         initHub();
       }
     }
