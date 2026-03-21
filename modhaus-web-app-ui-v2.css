@@ -1,10 +1,10 @@
 /*
  * ==================================================================
- * FILE: modhaus-web-app-ui-v1.css ========= Updated 2026-03-20
+ * FILE: modhaus-web-app-ui-v2.css ========= Updated 2026-03-21
  * ==================================================================
  * Purpose: Central Modhaus Design System for all Decoupled PWAs.
- * Updates: Brought Title Block up to date. Merged Legacy Portal UI, 
- * Timesheet UI, and Responsive Modals into the core CDN.
+ * Updates: Added System Version Tags (Status Pills) for environment 
+ * identification.
  */
 
 :root {
@@ -222,4 +222,46 @@ body {
     animation: fadeIn 0.2s ease-out; 
   }
   @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+}
+
+/* ==================================================================
+ * SYSTEM VERSION TAGS (Rule 7)
+ * ================================================================== */
+.mod-sys-container {
+  display: flex;
+  justify-content: center;
+  padding: 20px 0;
+}
+
+.mod-sys-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #6B7280;
+  background: white;
+  padding: 6px 14px;
+  border: 1px solid #E5E7EB;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.mod-sys-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.dot-pwa {
+  background-color: #10B981; 
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+}
+
+.dot-gas {
+  background-color: #F59E0B; 
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
 }
