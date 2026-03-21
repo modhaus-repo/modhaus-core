@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Modhaus Hub</title>
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="https://modhaus-repo.github.io/modhaus-core/modhaus-web-app-ui-v2.css">
+  
+  <style>
+    .hub-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 20px; }
+    @media (min-width: 768px) { .hub-grid { grid-template-columns: 1fr 1fr; } }
+    
+    .hub-btn {
+      display: flex; align-items: center; justify-content: space-between;
+      background: white; border: 1px solid var(--mod-border); border-radius: 12px;
+      padding: 18px 20px; font-size: 1.1rem; font-weight: 700; color: var(--mod-text-main);
+      text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+      transition: all 0.2s; cursor: pointer;
+    }
+    .hub-btn:hover { border-color: var(--mod-blue); box-shadow: 0 4px 12px rgba(29,78,216,0.1); transform: translateY(-2px); }
+    .hub-icon { font-size: 1.5rem; }
+    
+    .role-badge { 
+      display: inline-block; background: #DBEAFE; color: #1D4ED8; 
+      font-size: 0.8rem; font-weight: 800; padding: 4px 10px; 
+      border-radius: 20px; text-transform: uppercase; margin-top: 5px; 
+    }
+  </style>
+</head>
+<body>
+
+  <div id="loginView" class="mod-container">
+    <div class="mod-card" style="max-width: 500px; margin: 40px auto; text-align: center;">
+      <img src="https://modhaus-repo.github.io/modhaus-core/modhaus-logo.png" alt="Modhaus Logo" style="max-width: 250px; margin-bottom: 20px;">
+      <h2 style="margin-bottom: 5px; font-weight: 800;">System Access</h2>
+      <p style="color: #6B7280; margin-bottom: 25px;">Please identify your role to configure the hub.</p>
+      
+      <div style="text-align: left;">
+        <label>Full Name</label>
+        <input type="text" id="setupName" class="mod-input" placeholder="e.g. Archie">
+        
+        <label>System Role</label>
+        <select id="setupRole" class="mod-input">
+          <option value="" disabled selected>-- Select Role --</option>
+          <option value="Admin">Admin / Management</option>
+          <option value="Worker">Worker</option>
+          <option value="Sub-Contractor">Sub-Contractor</option>
+        </select>
+        
+        <button class="mod-btn" style="margin-top: 15px; width: 100%;" onclick="registerProfile()">Configure Hub</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="hubView" class="mod-container hidden">
+    <div class="mod-card">
+      <div class="mod-header" style="display: flex; justify-content: space-between; align-items: flex-start; text-align: left; margin-bottom: 20px;">
+        <div>
+          <h1 class="mod-title">Modhaus Hub</h1>
+          <div class="role-badge" id="displayRole">Loading...</div>
+        </div>
+        <button onclick="logoutProfile()" class="mod-btn-secondary" style="font-size: 0.8rem; padding: 6px 12px; border-radius: 6px;">Reset</button>
+      </div>
+      
+      <p style="color: #4B5563; font-weight: 500;">Welcome back, <span id="displayName" style="color: #111827; font-weight: 800;"></span>.</p>
+      
+      <div class="hub-grid">
+        <a href="admin-timesheet.html" class="hub-btn mod-req-admin">
+          <span><span class="hub-icon">⏱️</span> Admin Timesheet</span>
+          <span style="color: #9CA3AF;">➜</span>
+        </a>
+        <a href="worker-timesheet.html" class="hub-btn mod-req-worker">
+          <span><span class="hub-icon">👷</span> Worker Timesheet</span>
+          <span style="color: #9CA3AF;">➜</span>
+        </a>
+        <a href="#" class="hub-btn">
+          <span><span class="hub-icon">📐</span> Construction Drawings</span>
+          <span style="color: #9CA3AF;">➜</span>
+        </a>
+        <a href="#" class="hub-btn">
+          <span><span class="hub-icon">📑</span> Specifications</span>
+          <span style="color: #9CA3AF;">➜</span>
+        </a>
+        <a href="#" class="hub-btn">
+          <span><span class="hub-icon">🗂️</span> Add. Documentation</span>
+          <span style="color: #9CA3AF;">➜</span>
+        </a>
+        <a href="#" class="hub-btn">
+          <span><span class="hub-icon">🚿</span> Fixture Specs</span>
+          <span style="color: #9CA3AF;">➜</span>
+        </a>
+        <a href="#" class="hub-btn">
+          <span><span class="hub-icon">⚠️</span> Safety Data Sheets</span>
+          <span style="color: #9CA3AF;">➜</span>
+        </a>
+        <a href="#" class="hub-btn">
+          <span><span class="hub-icon">📋</span> Site Induction Form</span>
+          <span style="color: #9CA3AF;">➜</span>
+        </a>
+        <a href="#" class="hub-btn">
+          <span><span class="hub-icon">🤝</span> Code Of Conduct</span>
+          <span style="color: #9CA3AF;">➜</span>
+        </a>
+      </div>
+      
+    </div>
+  </div>
+
+  <div class="mod-sys-container">
+    <div class="mod-sys-tag">
+      <span class="mod-sys-dot dot-pwa"></span>
+      PWA Hub | V2
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', initHub);
+
+    function initHub() {
+      const savedName = localStorage.getItem('modhaus_user_name');
+      const savedRole = localStorage.getItem('modhaus_user_role');
+      
+      if (savedName && savedRole) {
+        document.getElementById('loginView').classList.add('hidden');
+        document.getElementById('hubView').classList.remove('hidden');
+        document.getElementById('displayName').textContent = savedName;
+        document.getElementById('displayRole').textContent = savedRole;
+        applyRoleRestrictions(savedRole);
+      } else {
+        document.getElementById('loginView').classList.remove('hidden');
+        document.getElementById('hubView').classList.add('hidden');
+      }
+    }
+
+    function applyRoleRestrictions(role) {
+      if (role !== 'Admin') {
+        document.querySelectorAll('.mod-req-admin').forEach(el => el.style.display = 'none');
+      }
+      if (role === 'Sub-Contractor') {
+        document.querySelectorAll('.mod-req-worker').forEach(el => el.style.display = 'none');
+      }
+    }
+
+    function registerProfile() {
+      const nameVal = document.getElementById('setupName').value.trim();
+      const roleVal = document.getElementById('setupRole').value;
+      
+      if (!nameVal || !roleVal) {
+        alert("Please enter both your name and role.");
+        return;
+      }
+      
+      localStorage.setItem('modhaus_user_name', nameVal);
+      localStorage.setItem('modhaus_user_role', roleVal);
+      
+      if (roleVal === 'Admin') {
+        localStorage.setItem('modhaus_admin_name', nameVal);
+      }
+      initHub();
+    }
+
+    function logoutProfile() {
+      if(confirm("Are you sure you want to clear your profile?")) {
+        localStorage.removeItem('modhaus_user_name');
+        localStorage.removeItem('modhaus_user_role');
+        initHub();
+      }
+    }
+  </script>
+</body>
+</html>
