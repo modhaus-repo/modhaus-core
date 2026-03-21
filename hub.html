@@ -31,6 +31,16 @@
       font-size: 0.8rem; font-weight: 800; padding: 4px 10px; 
       border-radius: 20px; text-transform: uppercase; margin-top: 5px; 
     }
+
+    /* ROADMAP FEATURE (Greyed out state for Admins) */
+    .mod-roadmap {
+      opacity: 0.45;
+      pointer-events: none; /* Prevents the user from clicking it */
+      background-color: #F9FAFB;
+      border: 1px dashed #D1D5DB;
+      box-shadow: none;
+    }
+    .mod-roadmap .hub-icon { filter: grayscale(100%); opacity: 0.8; }
   </style>
 </head>
 <body>
@@ -84,35 +94,35 @@
           <span style="color: #9CA3AF;">➜</span>
         </a>
 
-        <a href="#" class="hub-btn hidden">
+        <a href="#" class="hub-btn mod-roadmap">
           <span><span class="hub-icon">📤</span> Upload Documentation</span>
           <span style="color: #9CA3AF;">➜</span>
         </a>
-        <a href="#" class="hub-btn hidden">
+        <a href="#" class="hub-btn mod-roadmap">
           <span><span class="hub-icon">📐</span> Construction Drawings</span>
           <span style="color: #9CA3AF;">➜</span>
         </a>
-        <a href="#" class="hub-btn hidden">
+        <a href="#" class="hub-btn mod-roadmap">
           <span><span class="hub-icon">📑</span> Specifications</span>
           <span style="color: #9CA3AF;">➜</span>
         </a>
-        <a href="#" class="hub-btn hidden">
+        <a href="#" class="hub-btn mod-roadmap">
           <span><span class="hub-icon">🗂️</span> Additional Documentation</span>
           <span style="color: #9CA3AF;">➜</span>
         </a>
-        <a href="#" class="hub-btn hidden">
+        <a href="#" class="hub-btn mod-roadmap">
           <span><span class="hub-icon">🚿</span> Fixture Specs</span>
           <span style="color: #9CA3AF;">➜</span>
         </a>
-        <a href="#" class="hub-btn hidden">
+        <a href="#" class="hub-btn mod-roadmap">
           <span><span class="hub-icon">⚠️</span> Safety Data Sheets</span>
           <span style="color: #9CA3AF;">➜</span>
         </a>
-        <a href="#" class="hub-btn hidden">
+        <a href="#" class="hub-btn mod-roadmap">
           <span><span class="hub-icon">📋</span> Site Induction Form</span>
           <span style="color: #9CA3AF;">➜</span>
         </a>
-        <a href="#" class="hub-btn hidden">
+        <a href="#" class="hub-btn mod-roadmap">
           <span><span class="hub-icon">🤝</span> Code Of Conduct</span>
           <span style="color: #9CA3AF;">➜</span>
         </a>
@@ -150,9 +160,13 @@
     }
 
     function applyRoleRestrictions(role) {
+      // 1. Logic for non-Admins
       if (role !== 'Admin') {
         document.querySelectorAll('.mod-req-admin').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.mod-roadmap').forEach(el => el.style.display = 'none'); // Hides the greyed-out buttons entirely
       }
+      
+      // 2. Logic for Sub-Contractors
       if (role === 'Sub-Contractor') {
         document.querySelectorAll('.mod-req-worker').forEach(el => el.style.display = 'none');
       }
