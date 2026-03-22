@@ -44,10 +44,12 @@
 
       <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: #374151;">My Time Blocks</h3>
       <div id="summaryContainer">
-        </div>
+        <p class="text-center" style="color:#6B7280; padding: 20px 0; font-weight: 500;">⏳ Fetching Time Blocks...</p>
+      </div>
 
-      <div style="display: flex; justify-content: space-between; margin-top: 20px;">
-        <button type="button" class="mod-btn mod-btn-secondary" onclick="addManualBlock()" style="width: 100%;">+ Add Time Block</button>
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
+        <button type="button" class="mod-btn mod-btn-secondary" onclick="addWorkdayBlock()" style="width: 100%;">+ Add Time Block</button>
+        <button type="button" class="mod-btn mod-btn-secondary" onclick="addAdditionalBlock()" style="width: 100%;">+ Add Additional Tasks Block</button>
       </div>
 
       <button type="button" id="btnSubmit" class="mod-btn" style="margin-top: 35px; width: 100%;" onclick="submitTimesheet()">Submit Timesheet</button>
@@ -58,10 +60,12 @@
 
   <div id="editPanelOverlay" class="panel-overlay" onclick="closeEditPanel(event)">
     <div class="mod-edit-panel" id="editPanelContent" onclick="event.stopPropagation()">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
         <h2 style="font-size: 1.4rem; font-weight: bold; margin: 0;">Edit Block</h2>
         <button class="mod-btn-close" onclick="closeEditPanel(true)" style="font-size: 1.5rem; margin: 0;">&times;</button>
       </div>
+
+      <div id="modalHelperText" style="font-size: 0.85rem; color: #4B5563; background: #F3F4F6; padding: 10px; border-radius: 6px; margin-bottom: 15px; border-left: 3px solid #1D4ED8;"></div>
 
       <input type="hidden" id="editIndex">
 
@@ -79,11 +83,11 @@
       <label>Project / Site</label>
       <select id="editProject" class="mod-input"></select>
 
-      <label>Notes (Optional)</label>
+      <label id="taskLabel">Tasks Completed (Required)</label>
       <textarea id="editTask" class="mod-input" rows="2" placeholder="What did you work on?"></textarea>
 
       <div class="action-row">
-        <button class="mod-btn mod-btn-secondary btn-triad" style="border-color: #DC2626; color: #DC2626;" onclick="deleteBlockFromPanel()">Delete</button>
+        <button id="btnDeleteBlock" class="mod-btn mod-btn-secondary btn-triad" style="border-color: #DC2626; color: #DC2626;" onclick="deleteBlockFromPanel()">Delete</button>
         <button class="mod-btn btn-triad" style="background-color: #10B981; border-color: #059669; color: white;" onclick="saveEditPanel()">Save Block</button>
       </div>
     </div>
@@ -108,7 +112,6 @@
     // ==================================================================
     // API CONFIGURATION
     // ==================================================================
-    // PASTE YOUR NEW GOOGLE APPS SCRIPT DEPLOYMENT URL HERE:
     const API_URL = "https://script.google.com/macros/s/AKfycbxErmt0SpLI0L486HfkRr001VUNqNLA_df8G6dEBTeFhJ6bP3ukex8aBdTFlQakqWGH/exec"; 
 
     async function sendToApi(action, data = {}) {
@@ -135,7 +138,7 @@
       const nameInput = document.getElementById('workerName');
       if (hubName) {
         nameInput.value = hubName;
-        nameInput.readOnly = true; // Locks the field so they can't change it
+        nameInput.readOnly = true; 
       }
       
       // 2. Set Date
@@ -143,38 +146,78 @@
       document.getElementById('workDate').value = today.toISOString().split('T')[0];
       appState.baseDateMs = new Date(document.getElementById('workDate').value).setHours(0,0,0,0);
 
-      // 3. Generate a default block (07:00 to 15:30)
-      generateDefaultBlock();
-
-      // 4. Load Active Projects from API
+      // 3. Load Active Projects from API (Triggers loading state)
       const projRes = await sendToApi('getActiveProjects');
       if (projRes.success && projRes.data) {
         appState.projects = projRes.data;
       }
+
+      // 4. Generate default dual-blocks
+      generateDefaultBlocks();
       renderSummary();
     });
 
     function handleDateChange() {
       appState.baseDateMs = new Date(document.getElementById('workDate').value).setHours(0,0,0,0);
-      renderSummary(); // Updates the internal time representation
+      renderSummary();
     }
 
-    function generateDefaultBlock() {
-      appState.blocks = [{
-        id: Date.now(), title: "Standard Day", task: "", address: "", category: "Standard",
-        startTime: appState.baseDateMs + (7 * 3600000), // 7:00 AM
-        endTime: appState.baseDateMs + (15.5 * 3600000) // 3:30 PM
-      }];
+    function generateDefaultBlocks() {
+      appState.blocks = [
+        {
+          id: Date.now(), blockType: "workday", title: "Work Day", task: "", address: "", category: "Work Day hours",
+          startTime: appState.baseDateMs + (7 * 3600000), // 7:00 AM
+          endTime: appState.baseDateMs + (15.5 * 3600000) // 3:30 PM
+        },
+        {
+          id: Date.now() + 1, blockType: "additional", title: "Additional Tasks", task: "", address: "", category: "Variation",
+          startTime: appState.baseDateMs + (7 * 3600000), // 7:00 AM
+          endTime: appState.baseDateMs + (7 * 3600000)    // 7:00 AM (0 hours)
+        }
+      ];
     }
 
-    function addManualBlock() {
-      let newStart = appState.baseDateMs + (7 * 3600000); 
-      if (appState.blocks.length > 0) newStart = appState.blocks[appState.blocks.length - 1].endTime;
+    function addWorkdayBlock() {
+      let newStart = appState.baseDateMs + (7 * 3600000);
+      const workdays = appState.blocks.filter(b => b.blockType === 'workday');
+      if (workdays.length > 0) newStart = workdays[workdays.length - 1].endTime;
+      
       appState.blocks.push({
-        id: Date.now(), title: "New Block", task: "", address: "", category: "Standard",
+        id: Date.now(), blockType: "workday", title: "Work Day", task: "", address: "", category: "Work Day hours",
         startTime: newStart, endTime: newStart + 3600000
       });
       renderSummary();
+    }
+
+    function addAdditionalBlock() {
+      let newStart = appState.baseDateMs + (15.5 * 3600000); // Default to after standard workday
+      const additionals = appState.blocks.filter(b => b.blockType === 'additional');
+      if (additionals.length > 0) newStart = additionals[additionals.length - 1].endTime;
+
+      appState.blocks.push({
+        id: Date.now(), blockType: "additional", title: "Additional Tasks", task: "", address: "", category: "Variation",
+        startTime: newStart, endTime: newStart + 3600000
+      });
+      renderSummary();
+    }
+
+    // --- SQUEEZE LOGIC (SCOPED TO WORKDAYS) ---
+    function runWorkerCascadeSqueeze(index, oldStartMs, oldEndMs) {
+      const block = appState.blocks[index];
+      if (block.blockType !== 'workday') return; // Do not squeeze additional tasks
+
+      if (block.endTime !== oldEndMs) {
+        let cascadeStart = block.endTime;
+        for (let j = index + 1; j < appState.blocks.length; j++) {
+          if (appState.blocks[j].blockType !== 'workday') continue;
+          appState.blocks[j].startTime = cascadeStart;
+          const duration = appState.blocks[j].endTime - appState.blocks[j].startTime;
+          if (duration < 15 * 60000) {
+            appState.blocks.splice(j, 1);
+            j--; 
+          } else { break; }
+        }
+      }
     }
 
     // --- RENDERING ---
@@ -193,13 +236,24 @@
       appState.blocks.forEach((block, index) => {
         const isProjectInvalid = !block.address || block.address === "Other" || block.address === "";
         const hours = ((block.endTime - block.startTime) / 3600000);
+        const isEmptyAdditional = (block.blockType === 'additional' && hours === 0);
         
-        let bgColor = "#F9FAFB";
-        let borderColor = isProjectInvalid ? "#9CA3AF" : "#1D4ED8"; 
+        let bgColor = block.blockType === 'additional' ? "#F3F4F6" : "#F9FAFB"; // Slightly darker for additionals
+        let borderColor = isProjectInvalid ? "#9CA3AF" : (block.blockType === 'additional' ? "#8B5CF6" : "#1D4ED8"); 
         
-        const projText = isProjectInvalid ? `<span style="color:#DC2626; font-weight:bold;">Tap to select Project</span>` : block.address;
+        let projText = isProjectInvalid ? `<span style="color:#DC2626; font-weight:bold;">Tap to select Project</span>` : block.address;
         const taskText = block.task ? ` | <span style="font-style:italic;">${block.task}</span>` : '';
         
+        // Custom display for 0-hour unassigned additional blocks
+        let timeDisplay = `${msToTime(block.startTime)} - ${msToTime(block.endTime)}`;
+        let durationDisplay = `${hours.toFixed(2)} hr`;
+        
+        if (isEmptyAdditional) {
+          projText = `<span style="color:#6B7280; font-weight:bold;">Tap to log extra tasks</span>`;
+          timeDisplay = "Not Set";
+          durationDisplay = "0.00 hr";
+        }
+
         const row = document.createElement('div');
         row.className = 'summary-row';
         row.style.background = bgColor;
@@ -208,11 +262,12 @@
         
         row.innerHTML = `
           <div style="flex: 1; padding-right: 15px;">
-            <div class="summary-time">${msToTime(block.startTime)} - ${msToTime(block.endTime)}</div>
+            <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 800; color: ${borderColor}; margin-bottom: 2px;">${block.title}</div>
+            <div class="summary-time">${timeDisplay}</div>
             <div class="summary-details">${projText}${taskText}</div>
           </div>
           <div style="font-weight: 700; color: ${borderColor}; background: white; border: 1px solid ${borderColor}; padding: 6px 12px; border-radius: 20px; font-size: 0.9rem; white-space: nowrap;">
-            ${hours.toFixed(2)} hr
+            ${durationDisplay}
           </div>
         `;
         container.appendChild(row);
@@ -227,13 +282,32 @@
       document.getElementById('editEnd').value = msToTime(block.endTime);
       
       const projSelect = document.getElementById('editProject');
-      const isInvalid = !block.address || block.address === "Other" || block.address === "";
       
+      // Auto-fill project for additional tasks if Work Day project exists
+      if (block.blockType === 'additional' && !block.address) {
+        const workday = appState.blocks.find(b => b.blockType === 'workday' && b.address);
+        if (workday) block.address = workday.address;
+      }
+
+      const isInvalid = !block.address || block.address === "Other" || block.address === "";
       let pOptions = `<option value="" disabled ${isInvalid ? 'selected' : ''}>-- Select Project --</option>`;
       appState.projects.forEach(p => { pOptions += `<option value="${p}" ${block.address === p ? 'selected' : ''}>${p}</option>`; });
       projSelect.innerHTML = pOptions;
       
       document.getElementById('editTask').value = block.task || "";
+
+      // Contextual UI Updates based on Block Type
+      const helperText = document.getElementById('modalHelperText');
+      const deleteBtn = document.getElementById('btnDeleteBlock');
+      
+      if (block.blockType === 'workday') {
+        helperText.innerHTML = "<strong>My Work Day:</strong> Please enter your workday hours and a list of the general tasks performed.<br><br><em>Morning Tea: 15 Minutes | Lunch: 30 Minutes</em>";
+        deleteBtn.textContent = "Delete";
+      } else {
+        helperText.innerHTML = "<strong>Additional Tasks:</strong> Please enter any additional tasks performed and the hours spent on that task.<br><br><em>One Time Block for each additional task.</em>";
+        deleteBtn.textContent = "No Additional Tasks";
+      }
+
       document.getElementById('editPanelOverlay').style.display = 'flex';
     }
 
@@ -244,13 +318,24 @@
     }
 
     function saveEditPanel() {
+      // Validation: Task field cannot be empty
+      const taskVal = document.getElementById('editTask').value.trim();
+      if (!taskVal) {
+        alert("Please add a description of the tasks performed.");
+        return;
+      }
+
       const index = parseInt(document.getElementById('editIndex').value);
       const block = appState.blocks[index];
+      const oldStart = block.startTime;
+      const oldEnd = block.endTime;
 
       block.startTime = timeToMs(document.getElementById('editStart').value, appState.baseDateMs);
       block.endTime = timeToMs(document.getElementById('editEnd').value, appState.baseDateMs);
       block.address = document.getElementById('editProject').value;
-      block.task = document.getElementById('editTask').value;
+      block.task = taskVal;
+
+      runWorkerCascadeSqueeze(index, oldStart, oldEnd);
 
       closeEditPanel(true);
       renderSummary();
@@ -280,6 +365,12 @@
       const nameVal = document.getElementById('workerName').value.trim();
       if(!nameVal) { alert("Name is required."); return; }
 
+      // Filter out empty "Additional Tasks" blocks before submission so they don't block the save or clutter the sheet
+      appState.blocks = appState.blocks.filter(b => {
+        const hours = (b.endTime - b.startTime) / 3600000;
+        return !(b.blockType === 'additional' && hours === 0);
+      });
+
       const invalidBlocks = appState.blocks.filter(b => !b.address || b.address === "Other" || b.address === "");
       if (invalidBlocks.length > 0) {
         document.getElementById('submitStatus').textContent = "Cannot submit: All blocks must have a Project selected.";
@@ -292,14 +383,14 @@
       btn.disabled = true; btn.textContent = "Submitting...";
 
       appState.blocks.forEach(b => { b.hours = (b.endTime - b.startTime) / 3600000; });
-      
+
       const payload = {
         workerName: nameVal,
         workerRole: "WRK_Standard", 
         dateOfWork: document.getElementById('workDate').value,
         blocks: appState.blocks
       };
-      
+
       // FIRE TO API ROUTER
       const response = await sendToApi('submitWorkerTimesheet', payload);
 
@@ -307,7 +398,7 @@
         document.getElementById('mainApp').classList.add('hidden');
         document.getElementById('successStage').classList.remove('hidden');
       } else {
-        status.textContent = 'Error: ' + (response.error || 'Server error'); 
+        status.textContent = 'Error: ' + (response.error || 'Server error');
         status.style.color = '#DC2626';
         btn.disabled = false; btn.textContent = "Submit Timesheet";
       }
