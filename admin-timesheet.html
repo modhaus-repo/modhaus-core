@@ -292,7 +292,7 @@
         if (!isProjectInvalid) borderColor = "#1D4ED8"; 
         if (isTransit) { bgColor = "#DBEAFE"; borderColor = "#2563EB"; }
         
-        const projText = isProjectInvalid ? `<span style="color:#DC2626; font-weight:bold;">Project Required</span>` : block.address;
+        const projText = isProjectInvalid ? `<span style="color:#DC2626; font-weight:bold;">Tap to select Project</span>` : block.address;
         const taskText = block.task ? ` | <span style="font-style:italic;">${block.task}</span>` : '';
         
         const row = document.createElement('div');
