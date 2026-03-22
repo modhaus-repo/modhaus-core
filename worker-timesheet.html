@@ -135,7 +135,6 @@
     let appState = { baseDateMs: 0, blocks: [], projects: [] };
 
     document.addEventListener('DOMContentLoaded', async function() {
-      // 1. Pull Identity from Hub
       const hubName = localStorage.getItem('modhaus_user_name');
       const nameInput = document.getElementById('workerName');
       if (hubName) {
@@ -143,18 +142,15 @@
         nameInput.readOnly = true; 
       }
       
-      // 2. Set Date
       const today = new Date();
       document.getElementById('workDate').value = today.toISOString().split('T')[0];
       appState.baseDateMs = new Date(document.getElementById('workDate').value).setHours(0,0,0,0);
 
-      // 3. Load Active Projects from API
       const projRes = await sendToApi('getActiveProjects');
       if (projRes.success && projRes.data) {
         appState.projects = projRes.data;
       }
 
-      // 4. Generate default dual-blocks
       generateDefaultBlocks();
       renderSummary();
     });
@@ -192,7 +188,7 @@
     }
 
     function addAdditionalBlock() {
-      let newStart = appState.baseDateMs + (15.5 * 3600000); // Default to after standard workday
+      let newStart = appState.baseDateMs + (15.5 * 3600000); 
       const additionals = appState.blocks.filter(b => b.blockType === 'additional');
       if (additionals.length > 0) newStart = additionals[additionals.length - 1].endTime;
 
@@ -237,7 +233,15 @@
 
       appState.blocks.forEach((block, index) => {
         const isProjectInvalid = !block.address || block.address === "Other" || block.address === "";
-        const hours = ((block.endTime - block.startTime) / 3600000);
+        
+        // Base hours calculation
+        let hours = ((block.endTime - block.startTime) / 3600000);
+        
+        // Unpaid Lunch Deduction: Subtract 0.5 hrs if Work Day block is 5+ hours long
+        if (block.blockType === 'workday' && hours >= 5) {
+            hours -= 0.5;
+        }
+
         const isEmptyAdditional = (block.blockType === 'additional' && hours === 0);
         
         let bgColor = block.blockType === 'additional' ? "#F3F4F6" : "#F9FAFB"; 
@@ -250,7 +254,7 @@
         let durationDisplay = `${hours.toFixed(2)} hr`;
         
         if (isEmptyAdditional) {
-          projText = `<span style="color:#6B7280; font-weight:bold;">Tap to log extra tasks</span>`;
+          projText = `<span style="color:#DC2626; font-weight:bold;">Tap to log additional tasks</span>`;
           timeDisplay = "Not Set";
           durationDisplay = "0.00 hr";
         }
@@ -295,13 +299,13 @@
       projSelect.innerHTML = pOptions;
       
       document.getElementById('editTask').value = block.task || "";
-      document.getElementById('modalAlert').style.display = 'none'; // Reset alert on open
+      document.getElementById('modalAlert').style.display = 'none'; 
 
       const helperText = document.getElementById('modalHelperText');
       const deleteBtn = document.getElementById('btnDeleteBlock');
       
       if (block.blockType === 'workday') {
-        helperText.innerHTML = "My Work Day: Please enter your workday hours and a list of the general tasks performed.<br><br>Includes: Morning tea, 15 minutes | Lunch, 45 minutes";
+        helperText.innerHTML = "My Work Day: Please enter your workday hours and a list of the general tasks performed.<br><br>Includes: Morning tea, 15 minutes | Lunch, 30 minutes";
         deleteBtn.textContent = "Delete";
       } else {
         helperText.innerHTML = "Additional Tasks: Please enter any additional tasks performed and the hours spent on that task.<br><br>One Time Block for each additional task.";
@@ -389,7 +393,11 @@
       const btn = document.getElementById('btnSubmit');
       btn.disabled = true; btn.textContent = "Submitting...";
 
-      appState.blocks.forEach(b => { b.hours = (b.endTime - b.startTime) / 3600000; });
+      appState.blocks.forEach(b => { 
+        let hrs = (b.endTime - b.startTime) / 3600000; 
+        if (b.blockType === 'workday' && hrs >= 5) { hrs -= 0.5; }
+        b.hours = hrs;
+      });
 
       const payload = {
         workerName: nameVal,
