@@ -1,21 +1,16 @@
 {
+  "name": "Modhaus System Hub",
   "short_name": "Modhaus",
-  "name": "Modhaus Internal Daycard",
+  "start_url": "./hub.html",
+  "display": "standalone",
+  "background_color": "#F9FAFB",
+  "theme_color": "#0b5394",
   "icons": [
     {
-      "src": "https://modhaus-repo.github.io/modhaus-core/icon-192.png",
+      "src": "icon-500.png",
+      "sizes": "512x512",
       "type": "image/png",
-      "sizes": "192x192"
-    },
-    {
-      "src": "https://modhaus-repo.github.io/modhaus-core/icon-512.png",
-      "type": "image/png",
-      "sizes": "512x512"
+      "purpose": "any maskable"
     }
-  ],
-  "start_url": "./hub.html",
-  "background_color": "#F3F4F6",
-  "display": "standalone",
-  "scope": "/",
-  "theme_color": "#1D4ED8"
+  ]
 }
