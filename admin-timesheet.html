@@ -24,11 +24,12 @@
   </div>
 
   <div class="mod-container" id="mainApp">
+   
     <div class="mod-card">
       
       <div class="mod-header" style="text-align: center; position: relative;">
         <button onclick="toggleDrawer()" class="mod-btn-secondary" style="position: absolute; left: 0; top: 0;">☰ Menu</button>
-        <img src="https://modhaus-repo.github.io/modhaus-core/modhaus-logo.png" alt="Modhaus Logo" class="mod-logo" style="max-width: 300px; margin: 0 auto 20px auto; display: block;">
+        <img src="https://modhaus-repo.github.io/modhaus-core/modhaus-logo.png" alt="Modhaus Logo" class="mod-logo" style="max-width: 200px; margin: 0 auto 20px auto; display: block;">
         <h1 class="mod-title">Admin Timesheet</h1>
       </div>
 
@@ -49,13 +50,14 @@
 
       <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: #374151;">Time Blocks</h3>
       <div id="summaryContainer">
-        </div>
-
-      <div style="display: flex; justify-content: space-between; margin-top: 20px;">
-        <button type="button" class="mod-btn mod-btn-secondary" onclick="addManualBlock()">+ Add Block to End</button>
+        <p class="text-center" style="color:#6B7280; padding: 20px 0; font-weight: 500;">⏳ Fetching Time Blocks...</p>
       </div>
 
-      <button type="button" id="btnSubmit" class="mod-btn" style="margin-top: 35px;" onclick="submitTimesheet()">Submit Timesheet</button>
+      <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+        <button type="button" class="mod-btn mod-btn-secondary" onclick="addManualBlock()" style="width: 100%;">+ Add Block to End</button>
+      </div>
+
+      <button type="button" id="btnSubmit" class="mod-btn" style="margin-top: 35px; width: 100%;" onclick="submitTimesheet()">Submit Timesheet</button>
       <div id="submitStatus" class="text-center" style="margin-top: 15px; font-weight: 500;"></div>
 
     </div>
@@ -92,13 +94,21 @@
 
       <label>Category</label>
       <select id="editCategory" class="mod-input">
-        <option value="Standard">Standard</option>
-        <option value="Transit">Transit</option>
-        <option value="Internal Admin">Internal Admin</option>
+        <option value="Site Management">Site Management</option>
+        <option value="Project Co-ordination" selected>Project Co-ordination</option>
+        <option value="Materials Co-ordination">Materials Co-ordination</option>
+        <option value="Estimating">Estimating</option>
+        <option value="Variation Admin">Variation Admin</option>
+        <option value="In Transit">In Transit</option>
+        <option value="Hardware Run">Hardware Run</option>
+        <option value="Defects">Defects</option>
+        <option value="Modhaus Admin">Modhaus Admin</option>
       </select>
 
-      <label>Task Description (Optional)</label>
-      <textarea id="editTask" class="mod-input" rows="2"></textarea>
+      <label id="taskLabel">Tasks Completed (Required)</label>
+      <textarea id="editTask" class="mod-input" rows="2" placeholder="What did you work on?"></textarea>
+
+      <div id="modalAlert" style="display: none; padding: 10px 14px; margin-bottom: 15px; background-color: #FEF2F2; color: #991B1B; border-left: 4px solid #EF4444; border-radius: 4px; font-size: 0.85rem; font-weight: 600;"></div>
 
       <div class="action-row">
         <button class="mod-btn mod-btn-secondary btn-triad" style="border-color: #DC2626; color: #DC2626;" onclick="deleteBlockFromPanel()">Remove Block</button>
@@ -116,17 +126,19 @@
     </div>
   </div>
 
+  <div class="mod-sys-container">
+    <div class="mod-sys-tag">
+      <span class="mod-sys-dot dot-pwa"></span>
+      PWA Admin | V2
+    </div>
+  </div>
+
   <script>
     // ==================================================================
     // API CONFIGURATION
     // ==================================================================
-    // PASTE YOUR NEW GOOGLE APPS SCRIPT DEPLOYMENT URL HERE:
     const API_URL = "https://script.google.com/macros/s/AKfycbxErmt0SpLI0L486HfkRr001VUNqNLA_df8G6dEBTeFhJ6bP3ukex8aBdTFlQakqWGH/exec"; 
 
-    /**
-     * The Master Fetch Wrapper
-     * Bypasses CORS by sending a text/plain stringified JSON payload.
-     */
     async function sendToApi(action, data = {}) {
       try {
         const payload = JSON.stringify({ action: action, data: data });
@@ -200,7 +212,6 @@
         dateOfWork: document.getElementById('workDate').value,
         blocks: appState.blocks
       };
-      
       // Fire and forget - silent background API save
       sendToApi('saveTempBlocks', payload);
     }
@@ -216,7 +227,7 @@
       for(let i = 0; i < 10; i++) {
         const startHour = 7 + i;
         appState.blocks.push({
-          id: Date.now() + i, title: "Manual Entry", task: "", address: "", category: "Standard",
+          id: Date.now() + i, title: "Manual Entry", task: "", address: "", category: "Project Co-ordination",
           startTime: appState.baseDateMs + (startHour * 3600000),
           endTime: appState.baseDateMs + ((startHour + 1) * 3600000)
         });
@@ -225,10 +236,10 @@
     }
 
     function addManualBlock() {
-      let newStart = appState.baseDateMs + (17 * 3600000); 
+      let newStart = appState.baseDateMs + (17 * 3600000);
       if (appState.blocks.length > 0) newStart = appState.blocks[appState.blocks.length - 1].endTime;
       appState.blocks.push({
-        id: Date.now(), title: "Manual Entry", task: "", address: "", category: "Standard",
+        id: Date.now(), title: "Manual Entry", task: "", address: "", category: "Project Co-ordination",
         startTime: newStart, endTime: newStart + 3600000
       });
       saveStateToHistory();
@@ -265,19 +276,19 @@
 
       if (appState.blocks.length === 0) {
         submitBtn.disabled = true;
-        container.innerHTML = '<p class="text-center" style="color:#6B7280;">No blocks. Add one to begin.</p>';
+        container.innerHTML = '<p class="text-center" style="color:#6B7280; padding: 20px 0;">No blocks. Add one to begin.</p>';
         return;
       }
       submitBtn.disabled = false;
-
       appState.blocks.forEach((block, index) => {
         const isProjectInvalid = !block.address || block.address === "Other" || block.address === "";
         const hours = ((block.endTime - block.startTime) / 3600000);
         const heightPx = Math.max(70, 40 + (hours * 45)); 
-        const isTransit = block.category === "Transit";
+        const isTransit = block.category === "In Transit";
         
         let bgColor = "#F9FAFB";
         let borderColor = "#9CA3AF"; 
+  
         if (!isProjectInvalid) borderColor = "#1D4ED8"; 
         if (isTransit) { bgColor = "#DBEAFE"; borderColor = "#2563EB"; }
         
@@ -288,7 +299,7 @@
         row.className = 'summary-row';
         row.style.background = bgColor;
         row.style.borderLeftColor = borderColor;
-        row.style.minHeight = `${heightPx}px`; 
+        row.style.minHeight = `${heightPx}px`;
         row.onclick = () => openEditPanel(index);
         
         row.innerHTML = `
@@ -309,7 +320,8 @@
       const now = new Date();
       let mins = now.getMinutes();
       const rem = mins % 15;
-      if (rem <= 5) { mins -= rem; } else { mins += (15 - rem); }
+      if (rem <= 5) { mins -= rem;
+      } else { mins += (15 - rem); }
       now.setMinutes(mins, 0, 0);
       return now.getTime();
     }
@@ -337,8 +349,10 @@
       pOptions += `<option value="In Transit" ${block.address === 'In Transit' ? 'selected' : ''}>In Transit</option>`;
       projSelect.innerHTML = pOptions;
       
-      document.getElementById('editCategory').value = block.category || "Standard";
+      document.getElementById('editCategory').value = block.category || "Project Co-ordination";
       document.getElementById('editTask').value = block.task || "";
+      document.getElementById('modalAlert').style.display = 'none'; // Reset alert
+      
       document.getElementById('editPanelOverlay').style.display = 'flex';
     }
 
@@ -349,6 +363,16 @@
     }
 
     function saveEditPanel() {
+      const taskVal = document.getElementById('editTask').value.trim();
+      const alertBox = document.getElementById('modalAlert');
+      
+      if (!taskVal) {
+        alertBox.textContent = "Please add a description of the tasks performed.";
+        alertBox.style.display = 'block';
+        setTimeout(() => { alertBox.style.display = 'none'; }, 4000);
+        return;
+      }
+
       const index = parseInt(document.getElementById('editIndex').value);
       const block = appState.blocks[index];
       const oldStart = block.startTime;
@@ -358,7 +382,7 @@
       block.endTime = timeToMs(document.getElementById('editEnd').value, appState.baseDateMs);
       block.address = document.getElementById('editProject').value;
       block.category = document.getElementById('editCategory').value;
-      block.task = document.getElementById('editTask').value;
+      block.task = taskVal;
 
       runCascadeSqueeze(index, oldStart, oldEnd);
       saveStateToHistory();
@@ -368,8 +392,13 @@
 
     function saveAsTransit() {
       document.getElementById('editProject').value = "In Transit";
-      document.getElementById('editCategory').value = "Transit";
-      document.getElementById('editTask').value = ""; 
+      document.getElementById('editCategory').value = "In Transit";
+      
+      // Prevent transit from failing validation if task is empty
+      if (!document.getElementById('editTask').value.trim()) {
+         document.getElementById('editTask').value = "Travel"; 
+      }
+      
       saveEditPanel();
     }
 
@@ -395,20 +424,29 @@
 
     // --- FINAL SUBMISSION (ASYNC) ---
     async function submitTimesheet() {
+      const nameVal = document.getElementById('workerName').value.trim();
+      const status = document.getElementById('submitStatus');
+
+      if(!nameVal) { 
+        status.textContent = "Cannot submit: Admin Name is required."; 
+        status.style.color = "#DC2626";
+        return; 
+      }
+
       const invalidBlocks = appState.blocks.filter(b => !b.address || b.address === "Other" || b.address === "");
       if (invalidBlocks.length > 0) {
-        document.getElementById('submitStatus').textContent = "Cannot submit: Please fix blocks with 'Project Required'.";
-        document.getElementById('submitStatus').style.color = "#DC2626";
+        status.textContent = "Cannot submit: Please fix blocks with 'Project Required'.";
+        status.style.color = "#DC2626";
         return;
       }
       
       const btn = document.getElementById('btnSubmit');
-      const status = document.getElementById('submitStatus');
       btn.disabled = true; btn.textContent = "Submitting...";
-
+      
       appState.blocks.forEach(b => { b.hours = (b.endTime - b.startTime) / 3600000; });
+      
       const payload = {
-        workerName: document.getElementById('workerName').value.trim(),
+        workerName: nameVal,
         workerRole: "ADM_Project Co-ordination", 
         dateOfWork: document.getElementById('workDate').value,
         blocks: appState.blocks
@@ -418,13 +456,13 @@
 
       // ASYNC FETCH: Final Submit
       const response = await sendToApi('submitAdminTimesheet', payload);
-
+      
       if (response.success) {
         localStorage.removeItem('modhaus_admin_blocks');
         document.getElementById('mainApp').classList.add('hidden');
         document.getElementById('successStage').classList.remove('hidden');
       } else {
-        status.textContent = 'Error: ' + (response.error || 'Server error'); 
+        status.textContent = 'Error: ' + (response.error || 'Server error');
         status.style.color = '#DC2626';
         btn.disabled = false; btn.textContent = "Submit Timesheet";
       }
