@@ -12,8 +12,8 @@
       "type": "image/png"
     },
     {
-      "src": "Icon-192.png",
-      "sizes": "192x192",
+      "src": "Icon-500.png",
+      "sizes": "500x500",
       "type": "image/png",
       "purpose": "any maskable"
     }
