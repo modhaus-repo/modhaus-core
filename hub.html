@@ -16,7 +16,7 @@
   <link rel="stylesheet" href="https://modhaus-repo.github.io/modhaus-core/modhaus-web-app-ui-v2.css">
   
   <style>
-    .hub-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 20px; }
+    .hub-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 15px; }
     @media (min-width: 768px) { .hub-grid { grid-template-columns: 1fr 1fr; } }
     
     .hub-btn {
@@ -35,10 +35,9 @@
       border-radius: 20px; text-transform: uppercase; margin-top: 5px; 
     }
 
-    /* ROADMAP FEATURE (Greyed out state for Admins) */
     .mod-roadmap {
       opacity: 0.45;
-      pointer-events: none; /* Prevents the user from clicking it */
+      pointer-events: none; 
       background-color: #F9FAFB;
       border: 1px dashed #D1D5DB;
       box-shadow: none;
@@ -58,7 +57,7 @@
       
       <div style="text-align: left;">
         <label>Full Name</label>
-        <input type="text" id="setupName" class="mod-input" placeholder="e.g. Archie Smith">
+        <input type="text" id="setupName" class="mod-input" placeholder="e.g. Archie">
         
         <label>System Role</label>
         <select id="setupRole" class="mod-input" onchange="handleRoleChange()">
@@ -69,7 +68,7 @@
         </select>
         
         <div id="pinContainer" class="hidden">
-          <label style="color: #DC2626; font-weight: bold;">Admin PIN Required</label>
+          <label id="pinLabel" style="color: #DC2626; font-weight: bold;">PIN Required</label>
           <input type="password" id="setupPin" class="mod-input" placeholder="Enter 4-digit PIN" inputmode="numeric" style="border-color: #DC2626; background-color: #FEF2F2;">
         </div>
         
@@ -89,6 +88,14 @@
       
       <p style="color: #4B5563; font-weight: 500; text-align: center; margin-bottom: 25px;">Welcome back, <span id="displayName" style="color: #111827; font-weight: 800;"></span>.</p>
       
+      <div style="background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 12px; padding: 15px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <div style="font-size: 0.75rem; color: #6B7280; font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">Active Project</div>
+          <div id="displayProject" style="font-size: 1.25rem; font-weight: 800; color: #111827;">None Set</div>
+        </div>
+        <button class="mod-btn-secondary" style="padding: 8px 16px; width: auto; font-size: 0.9rem;" onclick="openProjectModal()">Change</button>
+      </div>
+
       <div class="hub-grid">
         <a href="admin-timesheet.html" class="hub-btn mod-req-admin">
           <span><span class="hub-icon">⏱️</span> Admin Timesheet</span>
@@ -99,34 +106,35 @@
           <span style="color: #9CA3AF;">➜</span>
         </a>
 
-        <a href="#" class="hub-btn mod-roadmap">
+        <a href="#" class="hub-btn mod-roadmap" data-portal-name="Upload Documentation">
           <span><span class="hub-icon">📤</span> Upload Documentation</span>
           <span style="color: #9CA3AF;">➜</span>
         </a>
-        <a href="#" class="hub-btn mod-roadmap">
+        <a href="#" class="hub-btn mod-roadmap" data-portal-name="Construction Drawings">
           <span><span class="hub-icon">📐</span> Construction Drawings</span>
           <span style="color: #9CA3AF;">➜</span>
         </a>
-        <a href="#" class="hub-btn mod-roadmap">
+        <a href="#" class="hub-btn mod-roadmap" data-portal-name="Specifications">
           <span><span class="hub-icon">📑</span> Specifications</span>
           <span style="color: #9CA3AF;">➜</span>
         </a>
-        <a href="#" class="hub-btn mod-roadmap">
+        <a href="#" class="hub-btn mod-roadmap" data-portal-name="Additional Documentation">
           <span><span class="hub-icon">🗂️</span> Additional Documentation</span>
           <span style="color: #9CA3AF;">➜</span>
         </a>
-        <a href="#" class="hub-btn mod-roadmap">
+        <a href="#" class="hub-btn mod-roadmap" data-portal-name="Fixture Specs">
           <span><span class="hub-icon">🚿</span> Fixture Specs</span>
           <span style="color: #9CA3AF;">➜</span>
         </a>
-        <a href="#" class="hub-btn mod-roadmap">
+        <a href="#" class="hub-btn mod-roadmap" data-portal-name="Safety Data Sheets">
           <span><span class="hub-icon">⚠️</span> Safety Data Sheets</span>
           <span style="color: #9CA3AF;">➜</span>
         </a>
-        <a href="#" class="hub-btn mod-roadmap">
+        <a href="#" class="hub-btn mod-roadmap" data-portal-name="Site Induction Form">
           <span><span class="hub-icon">📋</span> Site Induction Form</span>
           <span style="color: #9CA3AF;">➜</span>
         </a>
+
         <a href="__CODE OF CONDUCT - All Workers - Term & Conditions of Engagement on site.pdf" class="hub-btn" target="_blank">
           <span><span class="hub-icon">📜</span> Code of Conduct</span>
           <span style="color: #9CA3AF;">➜</span>
@@ -143,6 +151,21 @@
          </div>
       </div>
 
+    </div>
+  </div>
+
+  <div id="projectModalOverlay" class="panel-overlay" onclick="closeProjectModal(event)" style="display: none;">
+    <div class="mod-edit-panel" id="projectModalContent" onclick="event.stopPropagation()">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h2 style="font-size: 1.4rem; font-weight: bold; margin: 0;">Set Active Project</h2>
+        <button class="mod-btn-close" onclick="closeProjectModal(true)" style="font-size: 1.5rem; margin: 0;">&times;</button>
+      </div>
+      <p style="color: #4B5563; font-size: 0.9rem; margin-bottom: 15px;">Enter the Job ID to sync portal documents for this site.</p>
+      
+      <label>Job ID</label>
+      <input type="text" id="inputJobId" class="mod-input" placeholder="e.g. 1806" inputmode="numeric">
+      
+      <button class="mod-btn" style="width: 100%; margin-top: 10px;" onclick="saveProject()">Sync Project Data</button>
     </div>
   </div>
 
@@ -166,6 +189,7 @@
     function initHub() {
       const savedName = localStorage.getItem('modhaus_user_name');
       const savedRole = localStorage.getItem('modhaus_user_role');
+      const savedProject = localStorage.getItem('modhaus_active_project');
       
       if (savedName && savedRole) {
         document.getElementById('loginView').classList.add('hidden');
@@ -173,21 +197,45 @@
         document.getElementById('displayName').textContent = savedName;
         document.getElementById('displayRole').textContent = savedRole;
         applyRoleRestrictions(savedRole);
-        document.getElementById('logoutConfirmBox').classList.add('hidden'); // Ensure confirm box is hidden on load
+        document.getElementById('logoutConfirmBox').classList.add('hidden'); 
+        
+        if (savedProject) {
+          document.getElementById('displayProject').textContent = savedProject;
+        }
       } else {
         document.getElementById('loginView').classList.remove('hidden');
         document.getElementById('hubView').classList.add('hidden');
       }
     }
 
+    function openProjectModal() {
+      document.getElementById('inputJobId').value = localStorage.getItem('modhaus_active_project') || '';
+      document.getElementById('projectModalOverlay').style.display = 'flex';
+    }
+
+    function closeProjectModal(fromClick = false) {
+      if(fromClick === true || fromClick.target === document.getElementById('projectModalOverlay')) {
+        document.getElementById('projectModalOverlay').style.display = 'none';
+      }
+    }
+
+    function saveProject() {
+      const jobVal = document.getElementById('inputJobId').value.trim();
+      if (!jobVal) {
+         showHubAlert("Please enter a valid Job ID.");
+         return;
+      }
+      localStorage.setItem('modhaus_active_project', jobVal);
+      document.getElementById('displayProject').textContent = jobVal;
+      closeProjectModal(true);
+      
+      showHubAlert(`Syncing documents for Project ${jobVal}...`);
+    }
+
     function applyRoleRestrictions(role) {
-      // 1. Logic for non-Admins
       if (role !== 'Admin') {
         document.querySelectorAll('.mod-req-admin').forEach(el => el.style.display = 'none');
-        document.querySelectorAll('.mod-roadmap').forEach(el => el.style.display = 'none'); 
       }
-      
-      // 2. Logic for Sub-Contractors
       if (role === 'Sub-Contractor') {
         document.querySelectorAll('.mod-req-worker').forEach(el => el.style.display = 'none');
       }
@@ -196,8 +244,13 @@
     function handleRoleChange() {
       const roleVal = document.getElementById('setupRole').value;
       const pinContainer = document.getElementById('pinContainer');
+      const pinLabel = document.getElementById('pinLabel');
       
       if (roleVal === 'Admin') {
+        pinLabel.textContent = "Admin PIN Required";
+        pinContainer.classList.remove('hidden');
+      } else if (roleVal === 'Worker') {
+        pinLabel.textContent = "Worker PIN Required";
         pinContainer.classList.remove('hidden');
       } else {
         pinContainer.classList.add('hidden');
@@ -214,13 +267,19 @@
         return;
       }
       
+      const pinVal = document.getElementById('setupPin').value;
+
       if (roleVal === 'Admin') {
-        const pinVal = document.getElementById('setupPin').value;
         if (pinVal !== '6308') {
           showHubAlert("Incorrect Admin PIN. Access Denied.");
           return; 
         }
         localStorage.setItem('modhaus_admin_name', nameVal); 
+      } else if (roleVal === 'Worker') {
+        if (pinVal !== '9820') {
+          showHubAlert("Incorrect Worker PIN. Access Denied.");
+          return;
+        }
       }
       
       localStorage.setItem('modhaus_user_name', nameVal);
@@ -228,32 +287,23 @@
       initHub();
     }
 
-    function requestLogout() {
-       document.getElementById('logoutConfirmBox').classList.remove('hidden');
-    }
-
-    function cancelLogout() {
-       document.getElementById('logoutConfirmBox').classList.add('hidden');
-    }
-
+    function requestLogout() { document.getElementById('logoutConfirmBox').classList.remove('hidden'); }
+    function cancelLogout() { document.getElementById('logoutConfirmBox').classList.add('hidden'); }
     function executeLogout() {
       localStorage.removeItem('modhaus_user_name');
       localStorage.removeItem('modhaus_user_role');
-      
+      localStorage.removeItem('modhaus_active_project');
       document.getElementById('setupName').value = '';
       document.getElementById('setupRole').value = '';
       document.getElementById('setupPin').value = '';
       handleRoleChange(); 
-      
       initHub();
     }
   </script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('Modhaus PWA Service Worker registered.', reg.scope))
-          .catch(err => console.error('PWA Registration failed:', err));
+        navigator.serviceWorker.register('./sw.js').catch(err => console.error(err));
       });
     }
   </script>
