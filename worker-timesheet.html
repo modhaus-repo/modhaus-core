@@ -65,7 +65,7 @@
         <button class="mod-btn-close" onclick="closeEditPanel(true)" style="font-size: 1.5rem; margin: 0;">&times;</button>
       </div>
 
-      <div id="modalHelperText" style="font-size: 0.85rem; color: #4B5563; background: #F3F4F6; padding: 10px; border-radius: 6px; margin-bottom: 15px; border-left: 3px solid #1D4ED8;"></div>
+      <div id="modalHelperText" style="font-size: 0.95rem; color: #4B5563; background: #F3F4F6; padding: 12px; border-radius: 6px; margin-bottom: 15px; border-left: 3px solid #1D4ED8;"></div>
 
       <input type="hidden" id="editIndex">
 
@@ -85,6 +85,8 @@
 
       <label id="taskLabel">Tasks Completed (Required)</label>
       <textarea id="editTask" class="mod-input" rows="2" placeholder="What did you work on?"></textarea>
+
+      <div id="modalAlert" style="display: none; padding: 10px 14px; margin-bottom: 15px; background-color: #FEF2F2; color: #991B1B; border-left: 4px solid #EF4444; border-radius: 4px; font-size: 0.85rem; font-weight: 600;"></div>
 
       <div class="action-row">
         <button id="btnDeleteBlock" class="mod-btn mod-btn-secondary btn-triad" style="border-color: #DC2626; color: #DC2626;" onclick="deleteBlockFromPanel()">Delete</button>
@@ -146,7 +148,7 @@
       document.getElementById('workDate').value = today.toISOString().split('T')[0];
       appState.baseDateMs = new Date(document.getElementById('workDate').value).setHours(0,0,0,0);
 
-      // 3. Load Active Projects from API (Triggers loading state)
+      // 3. Load Active Projects from API
       const projRes = await sendToApi('getActiveProjects');
       if (projRes.success && projRes.data) {
         appState.projects = projRes.data;
@@ -204,7 +206,7 @@
     // --- SQUEEZE LOGIC (SCOPED TO WORKDAYS) ---
     function runWorkerCascadeSqueeze(index, oldStartMs, oldEndMs) {
       const block = appState.blocks[index];
-      if (block.blockType !== 'workday') return; // Do not squeeze additional tasks
+      if (block.blockType !== 'workday') return; 
 
       if (block.endTime !== oldEndMs) {
         let cascadeStart = block.endTime;
@@ -238,13 +240,12 @@
         const hours = ((block.endTime - block.startTime) / 3600000);
         const isEmptyAdditional = (block.blockType === 'additional' && hours === 0);
         
-        let bgColor = block.blockType === 'additional' ? "#F3F4F6" : "#F9FAFB"; // Slightly darker for additionals
+        let bgColor = block.blockType === 'additional' ? "#F3F4F6" : "#F9FAFB"; 
         let borderColor = isProjectInvalid ? "#9CA3AF" : (block.blockType === 'additional' ? "#8B5CF6" : "#1D4ED8"); 
         
         let projText = isProjectInvalid ? `<span style="color:#DC2626; font-weight:bold;">Tap to select Project</span>` : block.address;
         const taskText = block.task ? ` | <span style="font-style:italic;">${block.task}</span>` : '';
         
-        // Custom display for 0-hour unassigned additional blocks
         let timeDisplay = `${msToTime(block.startTime)} - ${msToTime(block.endTime)}`;
         let durationDisplay = `${hours.toFixed(2)} hr`;
         
@@ -262,7 +263,7 @@
         
         row.innerHTML = `
           <div style="flex: 1; padding-right: 15px;">
-            <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 800; color: ${borderColor}; margin-bottom: 2px;">${block.title}</div>
+            <div style="font-size: 1.1rem; font-weight: 700; color: ${borderColor}; margin-bottom: 5px;">${block.title}</div>
             <div class="summary-time">${timeDisplay}</div>
             <div class="summary-details">${projText}${taskText}</div>
           </div>
@@ -283,7 +284,6 @@
       
       const projSelect = document.getElementById('editProject');
       
-      // Auto-fill project for additional tasks if Work Day project exists
       if (block.blockType === 'additional' && !block.address) {
         const workday = appState.blocks.find(b => b.blockType === 'workday' && b.address);
         if (workday) block.address = workday.address;
@@ -295,16 +295,16 @@
       projSelect.innerHTML = pOptions;
       
       document.getElementById('editTask').value = block.task || "";
+      document.getElementById('modalAlert').style.display = 'none'; // Reset alert on open
 
-      // Contextual UI Updates based on Block Type
       const helperText = document.getElementById('modalHelperText');
       const deleteBtn = document.getElementById('btnDeleteBlock');
       
       if (block.blockType === 'workday') {
-        helperText.innerHTML = "<strong>My Work Day:</strong> Please enter your workday hours and a list of the general tasks performed.<br><br><em>Morning Tea: 15 Minutes | Lunch: 30 Minutes</em>";
+        helperText.innerHTML = "My Work Day: Please enter your workday hours and a list of the general tasks performed.<br><br>Includes: Morning tea, 15 minutes | Lunch, 45 minutes";
         deleteBtn.textContent = "Delete";
       } else {
-        helperText.innerHTML = "<strong>Additional Tasks:</strong> Please enter any additional tasks performed and the hours spent on that task.<br><br><em>One Time Block for each additional task.</em>";
+        helperText.innerHTML = "Additional Tasks: Please enter any additional tasks performed and the hours spent on that task.<br><br>One Time Block for each additional task.";
         deleteBtn.textContent = "No Additional Tasks";
       }
 
@@ -318,10 +318,13 @@
     }
 
     function saveEditPanel() {
-      // Validation: Task field cannot be empty
       const taskVal = document.getElementById('editTask').value.trim();
+      const alertBox = document.getElementById('modalAlert');
+      
       if (!taskVal) {
-        alert("Please add a description of the tasks performed.");
+        alertBox.textContent = "Please add a description of the tasks performed.";
+        alertBox.style.display = 'block';
+        setTimeout(() => { alertBox.style.display = 'none'; }, 4000);
         return;
       }
 
@@ -363,9 +366,14 @@
     // --- SUBMISSION ---
     async function submitTimesheet() {
       const nameVal = document.getElementById('workerName').value.trim();
-      if(!nameVal) { alert("Name is required."); return; }
+      const status = document.getElementById('submitStatus');
+      
+      if(!nameVal) { 
+        status.textContent = "Cannot submit: Worker Name is required."; 
+        status.style.color = "#DC2626";
+        return; 
+      }
 
-      // Filter out empty "Additional Tasks" blocks before submission so they don't block the save or clutter the sheet
       appState.blocks = appState.blocks.filter(b => {
         const hours = (b.endTime - b.startTime) / 3600000;
         return !(b.blockType === 'additional' && hours === 0);
@@ -373,13 +381,12 @@
 
       const invalidBlocks = appState.blocks.filter(b => !b.address || b.address === "Other" || b.address === "");
       if (invalidBlocks.length > 0) {
-        document.getElementById('submitStatus').textContent = "Cannot submit: All blocks must have a Project selected.";
-        document.getElementById('submitStatus').style.color = "#DC2626";
+        status.textContent = "Cannot submit: All blocks must have a Project selected.";
+        status.style.color = "#DC2626";
         return;
       }
       
       const btn = document.getElementById('btnSubmit');
-      const status = document.getElementById('submitStatus');
       btn.disabled = true; btn.textContent = "Submitting...";
 
       appState.blocks.forEach(b => { b.hours = (b.endTime - b.startTime) / 3600000; });
@@ -391,7 +398,6 @@
         blocks: appState.blocks
       };
 
-      // FIRE TO API ROUTER
       const response = await sendToApi('submitWorkerTimesheet', payload);
 
       if (response.success) {
