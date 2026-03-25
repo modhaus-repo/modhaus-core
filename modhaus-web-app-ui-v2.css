@@ -265,3 +265,17 @@ body {
   background-color: #F59E0B; 
   box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
 }
+
+.mod-sidebar-left {
+  position: fixed;
+  top: 0;
+  left: calc(-1 * var(--drawer-width));
+  width: var(--drawer-width);
+  height: 100%;
+  background: #0b5394; /* Modhaus Hub Blue */
+  transition: left 0.3s ease-in-out;
+  z-index: 1000;
+}
+.mod-sidebar-left.active {
+  left: 0;
+}
