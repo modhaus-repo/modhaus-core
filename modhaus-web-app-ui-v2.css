@@ -339,7 +339,7 @@ body {
 }
 
 /* =========================================
-   MODHAUS FULL-SCREEN OVERLAY (SHARP EDGES)
+   MODHAUS FIXED & ANCHORED LOADER
    ========================================= */
 
 .mod-loader-overlay {
@@ -355,7 +355,6 @@ body {
   z-index: 9999;
 }
 
-/* Container for the logo and ring */
 .square-logo-loader {
   position: relative;
   width: 160px; 
@@ -365,42 +364,56 @@ body {
   justify-content: center;
   background-color: #ffffff; 
   border-radius: 50%;
+  /* Resetting potential inherited styles */
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
 }
 
-/* The sharp-edged spinning ring */
 .square-logo-loader::before {
   content: '';
   position: absolute;
-  /* Size it slightly larger to act as the border */
-  inset: -8px; 
-  border-radius: 50%;
+  /* We define an explicit size for the ring (160px container + 8px border each side = 176px) */
+  width: 176px;
+  height: 176px;
   
-  /* Use a conic gradient with hard stops (no blur) */
-  /* This creates a sharp 90-degree green arc */
+  /* PERFECT ANCHORING: Lock the center point */
+  top: 50%;
+  left: 50%;
+  /* We move it back by 50% of its own width/height to center it perfectly */
+  /* The animation must also include this translate to stay centered */
+  transform: translate(-50%, -50%) rotate(0deg);
+  
+  border-radius: 50%;
   background: conic-gradient(
     #10B981 0deg, 
     #10B981 90deg, 
     rgba(255, 255, 255, 0.1) 90deg
   );
   
-  /* This mask turns the solid "pie" into a hollow ring */
   -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 8px), #fff 0);
           mask: radial-gradient(farthest-side, transparent calc(100% - 8px), #fff 0);
   
-  animation: mod-spin 1s linear infinite;
+  animation: mod-spin-fixed 1s linear infinite;
   z-index: 3; 
+  box-sizing: border-box;
 }
 
-/* The inner logo */
 .square-logo-loader img {
-  position: relative;
+  display: block; /* Removes baseline spacing */
   width: 120px; 
   height: 120px; 
+  margin: 0; /* Ensures no external margins nudge it */
   z-index: 2;
   mix-blend-mode: multiply; 
 }
 
-@keyframes mod-spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+/* Updated Keyframes: Must keep the translate(-50%, -50%) to stay anchored! */
+@keyframes mod-spin-fixed {
+  0% { 
+    transform: translate(-50%, -50%) rotate(0deg); 
+  }
+  100% { 
+    transform: translate(-50%, -50%) rotate(360deg); 
+  }
 }
