@@ -297,3 +297,43 @@ body {
 .mod-toggle input:checked + .mod-slider { background-color: #10B981; }
 .mod-toggle input:checked + .mod-slider:before { transform: translateX(20px); }
 .mod-toggle input:disabled + .mod-slider { opacity: 0.5; cursor: not-allowed; }
+
+/* =========================================
+   MODHAUS CUSTOM LOADER ANIMATION
+   ========================================= */
+.square-logo-loader {
+  position: relative;
+  width: 160px; 
+  height: 160px; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 20px auto; /* Centers it cleanly inside our Hub cards */
+}
+
+.square-logo-loader::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box; 
+  border-radius: 50%; 
+  border: 8px solid #e2e8f0; 
+  border-top-color: #10B981; /* Changed from blue to Modhaus Green to match your UI! */
+  animation: mod-spin 1s linear infinite;
+  z-index: 3; 
+  pointer-events: none; 
+}
+
+.square-logo-loader img {
+  position: relative;
+  width: 120px; 
+  height: 120px; 
+  z-index: 2; 
+  mix-blend-mode: multiply; 
+}
+
+@keyframes mod-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
