@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #F3F4F6;">
+  <div style="max-width: 600px; margin: 20px auto; background-color: #FFFFFF; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+    
+    <div style="background-color: #0b5394; padding: 30px 20px; text-align: center;">
+      <img src="https://modhaus-repo.github.io/modhaus-core/logo-full.png" alt="Modhaus Logo" style="max-width: 180px; filter: brightness(0) invert(1);">
+    </div>
+    
+    <div style="padding: 30px;">
+      <h2 style="color: #111827; margin-top: 0; font-size: 1.4rem;">{{EMAIL_TITLE}}</h2>
+      <p style="color: #4B5563; font-size: 1rem; line-height: 1.5;">{{EMAIL_SUBTITLE}}</p>
+      
+      <div style="background-color: #F9FAFB; border-left: 4px solid #10B981; padding: 15px; margin: 25px 0; border-radius: 4px;">
+        {{DYNAMIC_DATA_BLOCK}}
+      </div>
+      
+      <p style="font-size: 0.8rem; color: #9CA3AF; margin-bottom: 25px;">System Ref: {{SYSTEM_REF}}</p>
+      
+      <div style="text-align: center;">
+        <a href="{{ACTION_BUTTON_URL}}" style="display: inline-block; background-color: #10B981; color: #FFFFFF; text-decoration: none; padding: 12px 25px; border-radius: 6px; font-weight: bold; font-size: 0.95rem;">{{ACTION_BUTTON_TEXT}}</a>
+      </div>
+    </div>
+    
+    <div style="background-color: #E5E7EB; padding: 15px; text-align: center; font-size: 0.75rem; color: #6B7280;">
+      <p style="margin: 0;">[ 🛠️ Modhaus EDA Router | {{VERSION_TAG}} ]</p>
+      <p style="margin: 5px 0 0 0;">Processed at: {{TIMESTAMP}}</p>
+    </div>
+    
+  </div>
+</body>
+</html>
